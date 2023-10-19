@@ -5,9 +5,11 @@ import com.softserve.dto.enums.ImportSaveStatus;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class TeacherImportDTO {
+public class TeacherImportDTO implements Serializable {
     private Long id;
     private String name;
     private String surname;

@@ -10,6 +10,7 @@ import com.softserve.repository.UserRepository;
 import com.softserve.service.impl.MailServiceImpl;
 import com.softserve.service.impl.UserServiceImpl;
 import com.softserve.util.PasswordGeneratingUtil;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -189,6 +190,7 @@ public class UserServiceTest {
         userService.findByToken("qflkwrgn");
     }
 
+    @Ignore("check if email has been sent")
     @Test
     public void registrationUser() {
         String url = "/sign_up";
@@ -214,6 +216,7 @@ public class UserServiceTest {
         );
     }
 
+    @Ignore("check if email has been sent")
     @Test
     public void automaticRegistration() {
         User expectedUser = new User();

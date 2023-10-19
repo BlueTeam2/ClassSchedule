@@ -30,7 +30,8 @@ const ScheduleItem = (props) => {
         openDialogWithData,
     } = props;
     const [anchorEl, setAnchorEl] = useState(null);
-    const { lesson } = itemData;
+    const { lesson, room } = itemData;
+
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -40,14 +41,15 @@ const ScheduleItem = (props) => {
     };
 
     const handelEdit = () => {
-        const { group, semester } = lesson;
+        const { group, semesterId } = lesson;
         const { id, period, dayOfWeek, evenOdd } = itemData;
         const editObj = {
             id,
             dayOfWeek,
             periodId: period.id,
             evenOdd,
-            semesterId: semester.id,
+            semesterId: semesterId,
+
         };
         checkRoomAvailability(editObj);
         selectByGroupId(group.id);
@@ -98,7 +100,7 @@ const ScheduleItem = (props) => {
                 />
             )}
             <p className="lesson-duration">
-                <b>1</b> {t(FORM_HOURS_LABEL)}
+                <b>{room.name}</b>
             </p>
         </Card>
     );

@@ -9,5 +9,6 @@
     "intersect_time_error_message": "Time intersect with other class time!",
     "email": "Invalid email address",
     "password": "Password has to include at least 1 uppercase letter, 1 number and 1 special number",
-    "bigger_than_this_year_message": "Bigger then this year"
+    "bigger_than_this_year_message": "Bigger then this year",
+    "url": "Invalid URL"
 }

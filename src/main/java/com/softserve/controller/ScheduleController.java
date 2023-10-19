@@ -4,7 +4,6 @@ import com.softserve.dto.*;
 import com.softserve.entity.*;
 import com.softserve.entity.enums.EvenOdd;
 import com.softserve.mapper.*;
-import com.softserve.security.jwt.JwtUser;
 import com.softserve.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -16,11 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Api(tags = "Schedule API")
@@ -117,7 +113,7 @@ public class ScheduleController {
     @GetMapping("/full/semester")
     @ApiOperation(value = "Get full schedule for semester")
     public ResponseEntity<ScheduleFullDTO> getFullScheduleForSemester(@RequestParam Long semesterId) {
-        log.info("In, getFullScheduleForGroup (semesterId = [{}]) ", semesterId);
+        log.info("In, getFullScheduleForSemester (semesterId = [{}]) ", semesterId);
         return ResponseEntity.status(HttpStatus.OK).body(scheduleService.getFullScheduleForSemester(semesterId));
     }
 
@@ -175,42 +171,6 @@ public class ScheduleController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/teacher")
-    @ApiOperation(value = "Get full schedule for current teacher by date range")
-    @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<List<ScheduleForTemporaryDateRangeDTO>> getScheduleByDateRangeForCurrentTeacher(@RequestParam String from,
-                                                                                                          @RequestParam String to,
-                                                                                                          @CurrentUser JwtUser jwtUser) {
-        log.info("In getScheduleByDateRangeForCurrentTeacher with from = {} and to = {}", from, to);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        DateTimeFormatter currentFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate fromDate = LocalDate.parse(LocalDate.parse(from, formatter).toString(), currentFormatter);
-        LocalDate toDate = LocalDate.parse(LocalDate.parse(to, formatter).toString(), currentFormatter);
-        Teacher teacher = teacherService.findByUserId(jwtUser.getId());
-        List<ScheduleForTemporaryDateRangeDTO> dto = fullDTOForTemporaryScheduleByTeacherDateRange(
-                scheduleService.temporaryScheduleByDateRangeForTeacher(fromDate, toDate, teacher.getId()));
-        return ResponseEntity.status(HttpStatus.OK).body(dto);
-    }
-
-    @GetMapping("/full/teachers/date-range")
-    @ApiOperation(value = "Get full schedule for teacher by date range")
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<List<ScheduleForTemporaryDateRangeDTO>> getScheduleByDateRangeForTeacher(@RequestParam String from,
-                                                                                                   @RequestParam String to,
-                                                                                                   @RequestParam Long teacherId) {
-        log.info("In getScheduleByDateForTeacher with from = {}, to={}, teacherId = {}", from, to, teacherId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        DateTimeFormatter currentFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate fromDate = LocalDate.parse(LocalDate.parse(from, formatter).toString(), currentFormatter);
-        LocalDate toDate = LocalDate.parse(LocalDate.parse(to, formatter).toString(), currentFormatter);
-        teacherService.getById(teacherId);
-        Map<LocalDate, Map<Period, Map<Schedule, TemporarySchedule>>> mapSchedules = scheduleService
-                .temporaryScheduleByDateRangeForTeacher(fromDate, toDate, teacherId);
-
-        List<ScheduleForTemporaryDateRangeDTO> dto = fullDTOForTemporaryScheduleByTeacherDateRange(mapSchedules);
-        return ResponseEntity.status(HttpStatus.OK).body(dto);
-    }
-
     @DeleteMapping("/delete-schedules")
     @ApiOperation(value = "Delete all schedules by semester id")
     @PreAuthorize("hasRole('MANAGER')")
@@ -236,44 +196,4 @@ public class ScheduleController {
         return ResponseEntity.ok().body(scheduleMapper.scheduleToScheduleDTO(updateSchedule));
     }
 
-    private List<ScheduleForTemporaryDateRangeDTO> fullDTOForTemporaryScheduleByTeacherDateRange(Map<LocalDate, Map<Period,
-            Map<Schedule, TemporarySchedule>>> map) {
-        List<ScheduleForTemporaryDateRangeDTO> fullDTO = new ArrayList<>();
-
-        for (Map.Entry<LocalDate, Map<Period, Map<Schedule, TemporarySchedule>>> itr : map.entrySet()) {
-            ScheduleForTemporaryDateRangeDTO scheduleForTemporaryDateRangeDTO = new ScheduleForTemporaryDateRangeDTO();
-            scheduleForTemporaryDateRangeDTO.setDate(itr.getKey());
-
-            List<ScheduleForTemporaryTeacherDateRangeDTO> scheduleForTemporaryTeacherDateRangeDTOS = new ArrayList<>();
-            for (Map.Entry<Period, Map<Schedule, TemporarySchedule>> entry : itr.getValue().entrySet()) {
-                for (Map.Entry<Schedule, TemporarySchedule> item : entry.getValue().entrySet()) {
-                    ScheduleForTemporaryTeacherDateRangeDTO scheduleForTemporaryTeacherDateRangeDTO = new ScheduleForTemporaryTeacherDateRangeDTO();
-
-                    ScheduleTemporaryTeacherDateRangeDTO lessonsInScheduleDTO = new ScheduleTemporaryTeacherDateRangeDTO();
-                    lessonsInScheduleDTO.setId(item.getKey().getId());
-                    lessonsInScheduleDTO.setPeriod(periodMapper.convertToDto(entry.getKey()));
-                    lessonsInScheduleDTO.setLesson(lessonsInScheduleMapper.lessonToLessonsInTemporaryScheduleDTO(item.getKey().getLesson()));
-                    lessonsInScheduleDTO.setPeriod(periodMapper.convertToDto(entry.getKey()));
-                    lessonsInScheduleDTO.setRoom(roomForScheduleMapper.roomToRoomForScheduleDTO(item.getKey().getRoom()));
-                    lessonsInScheduleDTO.setVacation(item.getValue().isVacation());
-
-                    scheduleForTemporaryTeacherDateRangeDTO.setSchedule(lessonsInScheduleDTO);
-
-                    if (item.getValue().getScheduleId() != null) {
-                        ScheduleTemporaryTeacherDateRangeDTO temporaryLessonsInScheduleDTO = new ScheduleTemporaryTeacherDateRangeDTO();
-                        temporaryLessonsInScheduleDTO.setId(item.getValue().getId());
-                        temporaryLessonsInScheduleDTO.setPeriod(periodMapper.convertToDto(item.getValue().getPeriod()));
-                        temporaryLessonsInScheduleDTO.setLesson(lessonsInScheduleMapper.lessonToLessonsInTemporaryScheduleDTO(item.getValue()));
-                        temporaryLessonsInScheduleDTO.setRoom(roomForScheduleMapper.roomToRoomForScheduleDTO(item.getValue().getRoom()));
-                        temporaryLessonsInScheduleDTO.setVacation(false);
-                        scheduleForTemporaryTeacherDateRangeDTO.setTemporarySchedule(temporaryLessonsInScheduleDTO);
-                    }
-                    scheduleForTemporaryTeacherDateRangeDTOS.add(scheduleForTemporaryTeacherDateRangeDTO);
-                    scheduleForTemporaryDateRangeDTO.setSchedules(scheduleForTemporaryTeacherDateRangeDTOS);
-                }
-            }
-            fullDTO.add(scheduleForTemporaryDateRangeDTO);
-        }
-        return fullDTO;
-    }
 }

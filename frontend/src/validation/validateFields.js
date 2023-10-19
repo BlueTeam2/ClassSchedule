@@ -32,7 +32,7 @@ export const required = (value) => (value ? undefined : i18n.t(REQUIRED_MESSAGE)
 
 export const isUrl = (value) => {
     const validationUrl = value?.match(
-        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g,
+        /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g,
     );
     if (value && validationUrl == null) return i18n.t(URL_MESSAGE);
     return '';

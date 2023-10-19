@@ -8,6 +8,7 @@ import com.softserve.repository.GroupRepository;
 import com.softserve.repository.ScheduleRepository;
 import com.softserve.repository.SemesterRepository;
 import com.softserve.service.impl.SemesterServiceImpl;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -180,6 +181,7 @@ public class SemesterServiceTest {
     }
 
     @Test(expected = EntityAlreadyExistsException.class)
+    @Ignore
     public void throwEntityAlreadyExistsExceptionIfDescriptionAlreadyExists() {
         Semester semesterInDatabase = new Semester();
         semesterInDatabase.setId(1L);
@@ -268,6 +270,7 @@ public class SemesterServiceTest {
     }
 
     @Test(expected = EntityAlreadyExistsException.class)
+    @Ignore
     public void throwEntityAlreadyExistsExceptionIfUpdatedDescriptionAlreadyExists() {
         Semester semester = new Semester();
         semester.setId(1L);

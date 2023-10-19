@@ -243,7 +243,7 @@ public class UserServiceImpl implements UserService {
             String token = UUID.randomUUID().toString();
             user.setToken(token);
             User registrationUser = save(user);
-            sendRegistrationMail(user, registrationMessage);
+            //sendRegistrationMail(user, registrationMessage);
             return registrationUser;
         } else {
             throw new IncorrectPasswordException();

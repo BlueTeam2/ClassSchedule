@@ -5,16 +5,18 @@
     "sent_label": "sent",
     "deleted_label": "deleted",
     "group_label": "group(s)",
-    "semester_service_is_active": "This semester can not be deleted, beacause it is active right now",
+    "semester_service_is_active": "This semester can not be deleted, because it is active right now",
     "semester_service_not_as_begin_or_end": "Your year is not the same as year of begin or end of semester. Are you sure you want to create it?",
     "back_end_success_operation": "{{cardType}} was successfully {{actionType}}",
+    "back_end_action_success": "Element was successfully {{actionType}}",
     "file_backend_success_operation": "{{cardType}} {{actionType}}",
-    "students_exist_in_this_group":"{{cardType}} already {{actionType}} this group",
-    "group_exist_in_this_semester":"{{cardType}} already {{actionType}} of this semester",
+    "students_exist_in_this_group": "{{cardType}} already {{actionType}} this group",
+    "group_exist_in_this_semester": "{{cardType}} already {{actionType}} of this semester",
     "chosen_semester_has_not_groups": "{{cardType}} hasn't {{actionType}}",
     "successfully_merged": "User and teacher have been successfully merged",
     "copied_label": "copied",
     "cleared_label": "cleared",
-    "student_label": "exist(s)",
-    "archived_label": "archived"
+    "exist_label": "exist(s)",
+    "archived_label": "archived",
+    "moved_to_group": "moved to the group"
 }

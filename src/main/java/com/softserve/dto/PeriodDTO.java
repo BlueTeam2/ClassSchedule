@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 
 @Setter
@@ -11,7 +12,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
-public class PeriodDTO {
+public class PeriodDTO implements Serializable {
     private Long id;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime startTime;

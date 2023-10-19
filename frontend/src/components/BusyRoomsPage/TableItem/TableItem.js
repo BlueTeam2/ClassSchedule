@@ -21,7 +21,6 @@ const TableItem = (props) => {
         const classEven = findItemInArray(schedule.classes[0].even, scheduleClass.id);
 
         return (
-            // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
             <section
                 key={`${index}_${classIndex.toString()}`}
                 onMouseOver={() => addClassDayBoard(schedule.day, scheduleClass.class_name)}

@@ -41,7 +41,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final GroupService groupService;
     private final TeacherService teacherService;
     private final SemesterService semesterService;
-    private final TemporaryScheduleService temporaryScheduleService;
     private final UserService userService;
     private final MailService mailService;
 
@@ -51,15 +50,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final RoomForScheduleMapper roomForScheduleMapper;
     private final TeacherMapper teacherMapper;
     private final LessonForTeacherScheduleMapper lessonForTeacherScheduleMapper;
-    private final TemporaryScheduleMapper temporaryScheduleMapper;
+
 
     @Autowired
     public ScheduleServiceImpl(ScheduleRepository scheduleRepository, LessonService lessonService, RoomService roomService,
                                GroupService groupService, TeacherService teacherService, SemesterService semesterService,
                                UserService userService, MailService mailService, GroupMapper groupMapper, PeriodMapper periodMapper,
                                LessonsInScheduleMapper lessonsInScheduleMapper, RoomForScheduleMapper roomForScheduleMapper,
-                               TeacherMapper teacherMapper, LessonForTeacherScheduleMapper lessonForTeacherScheduleMapper,
-                               TemporaryScheduleService temporaryScheduleService, TemporaryScheduleMapper temporaryScheduleMapper) {
+                               TeacherMapper teacherMapper, LessonForTeacherScheduleMapper lessonForTeacherScheduleMapper) {
         this.scheduleRepository = scheduleRepository;
         this.lessonService = lessonService;
         this.roomService = roomService;
@@ -68,14 +66,12 @@ public class ScheduleServiceImpl implements ScheduleService {
         this.semesterService = semesterService;
         this.userService = userService;
         this.mailService = mailService;
-        this.temporaryScheduleService = temporaryScheduleService;
         this.groupMapper = groupMapper;
         this.periodMapper = periodMapper;
         this.lessonsInScheduleMapper = lessonsInScheduleMapper;
         this.roomForScheduleMapper = roomForScheduleMapper;
         this.teacherMapper = teacherMapper;
         this.lessonForTeacherScheduleMapper = lessonForTeacherScheduleMapper;
-        this.temporaryScheduleMapper = temporaryScheduleMapper;
     }
 
     /**
@@ -96,7 +92,7 @@ public class ScheduleServiceImpl implements ScheduleService {
      * {@inheritDoc}
      */
     @Override
-    @Cacheable("scheduleList")
+    //@Cacheable("scheduleList")
     public List<Schedule> getAll() {
         log.info("In getAll()");
         List<Schedule> schedules = scheduleRepository.getAll();
@@ -269,7 +265,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 scheduleForGroupDTO.setDays(getDaysWhenGroupHasClassesBySemester(semesterId, groupId));
                 scheduleForGroupDTOList.add(scheduleForGroupDTO);
             }
-            return addTemporaryScheduleToScheduleForGroup(semesterId, scheduleForGroupDTOList);
+            return scheduleForGroupDTOList;
         } else {
             groupsForSchedule.addAll(scheduleRepository.uniqueGroupsInScheduleBySemester(semesterId));
             for (Group group : groupsForSchedule) {
@@ -278,7 +274,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 scheduleForGroupDTO.setDays(getDaysWhenGroupHasClassesBySemester(semesterId, group.getId()));
                 scheduleForGroupDTOList.add(scheduleForGroupDTO);
             }
-            return addTemporaryScheduleToScheduleForGroup(semesterId, scheduleForGroupDTOList);
+            return scheduleForGroupDTOList;
         }
     }
 
@@ -364,6 +360,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     /**
      * {@inheritDoc}
      */
+    @Cacheable("scheduleList")
     @Override
     public ScheduleFullDTO getFullScheduleForSemester(Long semesterId) {
         ScheduleFullDTO scheduleFullDTO = new ScheduleFullDTO();
@@ -382,83 +379,8 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         }
         scheduleFullDTO.setSchedule(scheduleForGroupDTOList);
-        return addTemporaryScheduleToScheduleForSemester(semesterId, scheduleFullDTO);
-
-    }
-
-    private ScheduleFullDTO addTemporaryScheduleToScheduleForSemester(Long semesterId, ScheduleFullDTO scheduleFullDTO) {
-        Map<EvenOdd, Map<DayOfWeek, List<TemporarySchedule>>> temporarySchedules = temporaryScheduleService
-                .getTemporaryScheduleForEvenOddWeeks(semesterId);
-
-        for (ScheduleForGroupDTO scheduleForGroupDTO : scheduleFullDTO.getSchedule()) {
-            setTemporaryScheduleInEvenOdd(temporarySchedules, scheduleForGroupDTO);
-        }
         return scheduleFullDTO;
-    }
 
-    private void setTemporaryScheduleInEvenOdd(Map<EvenOdd, Map<DayOfWeek, List<TemporarySchedule>>> temporarySchedules,
-                                               ScheduleForGroupDTO scheduleForGroupDTO) {
-        for (DaysOfWeekWithClassesForGroupDTO daysOfWeekWithClassesForGroupDTO : scheduleForGroupDTO.getDays()) {
-            for (ClassesInScheduleForGroupDTO classesInScheduleForGroupDTO : daysOfWeekWithClassesForGroupDTO.getClasses()) {
-                LessonInScheduleByWeekDTO lessonInScheduleByWeekDTO = classesInScheduleForGroupDTO.getWeeks();
-                LessonsInScheduleDTO even = lessonInScheduleByWeekDTO.getEven();
-                LessonsInScheduleDTO odd = lessonInScheduleByWeekDTO.getOdd();
-                if (even != null && !temporarySchedules.get(EvenOdd.EVEN).isEmpty() &&
-                        temporarySchedules.get(EvenOdd.EVEN).get(daysOfWeekWithClassesForGroupDTO.getDay()) != null) {
-                    TemporaryScheduleDTOForDashboard temporaryScheduleDTO = compareScheduleWithTemporarySchedule(
-                            temporarySchedules.get(EvenOdd.EVEN).get(daysOfWeekWithClassesForGroupDTO.getDay()),
-                            scheduleForGroupDTO.getGroup().getId(), classesInScheduleForGroupDTO.getPeriod().getId(),
-                            classesInScheduleForGroupDTO.getWeeks().getEven().getTeacher().getId());
-                    if (temporaryScheduleDTO != null) {
-                        even.setTemporaryScheduleDTO(temporaryScheduleDTO);
-                    }
-                }
-                if (odd != null && !temporarySchedules.get(EvenOdd.ODD).isEmpty() &&
-                        temporarySchedules.get(EvenOdd.ODD).get(daysOfWeekWithClassesForGroupDTO.getDay()) != null) {
-                    TemporaryScheduleDTOForDashboard temporaryScheduleDTO = compareScheduleWithTemporarySchedule(
-                            temporarySchedules.get(EvenOdd.ODD).get(daysOfWeekWithClassesForGroupDTO.getDay()),
-                            scheduleForGroupDTO.getGroup().getId(), classesInScheduleForGroupDTO.getPeriod().getId(),
-                            classesInScheduleForGroupDTO.getWeeks().getOdd().getTeacher().getId());
-                    if (temporaryScheduleDTO != null) {
-                        odd.setTemporaryScheduleDTO(temporaryScheduleDTO);
-                    }
-                }
-
-            }
-        }
-    }
-
-    private List<ScheduleForGroupDTO> addTemporaryScheduleToScheduleForGroup(Long semesterId, List<ScheduleForGroupDTO> scheduleForGroupDTOList) {
-        Map<EvenOdd, Map<DayOfWeek, List<TemporarySchedule>>> temporarySchedules = temporaryScheduleService
-                .getTemporaryScheduleForEvenOddWeeks(semesterId);
-        for (ScheduleForGroupDTO scheduleForGroupDTO : scheduleForGroupDTOList) {
-            setTemporaryScheduleInEvenOdd(temporarySchedules, scheduleForGroupDTO);
-        }
-        return scheduleForGroupDTOList;
-    }
-
-    private TemporaryScheduleDTOForDashboard compareScheduleWithTemporarySchedule(List<TemporarySchedule> temporarySchedules,
-                                                                                  Long groupId, Long periodId, Long teacherId) {
-        TemporarySchedule temporarySchedule = temporarySchedules.stream().filter(temporarySchedule1 ->
-                        !temporarySchedule1.isVacation() && temporarySchedule1.getScheduleId() != null
-                                && temporarySchedule1.getPeriod().getId().equals(periodId)
-                                && temporarySchedule1.getGroup().getId().equals(groupId)
-                )
-                .findFirst().orElse(temporarySchedules.stream().filter(temporarySchedule1 ->
-                        temporarySchedule1.getScheduleId() != null &&
-                                temporarySchedule1.getPeriod().getId().equals(periodId)
-                                && temporarySchedule1.getGroup().getId().equals(groupId) &&
-                                temporarySchedule1.isVacation()
-                ).findFirst().orElse(temporarySchedules.stream().filter(temporarySchedule1 ->
-                        temporarySchedule1.getPeriod() == null &&
-                                temporarySchedule1.getScheduleId() == null &&
-                                temporarySchedule1.getTeacher() != null
-                                && temporarySchedule1.getTeacher().getId().equals(teacherId)
-                                && temporarySchedule1.isVacation()
-                ).findFirst().orElse(temporarySchedules.stream().filter(temporarySchedule1 ->
-                        temporarySchedule1.getScheduleId() == null && temporarySchedule1.isVacation()
-                ).findFirst().orElse(new TemporarySchedule()))));
-        return temporaryScheduleMapper.convertToDtoForDashboard(temporarySchedule);
     }
 
     private List<DaysOfWeekWithClassesForGroupDTO> getDaysForSemester(Long semesterId, Long groupId) {
@@ -516,42 +438,6 @@ public class ScheduleServiceImpl implements ScheduleService {
             daysOfWeekWithClassesForTeacherDTOList.add(daysOfWeekWithClassesForTeacherDTO);
         }
         scheduleForTeacherDTO.setDays(daysOfWeekWithClassesForTeacherDTOList);
-        return addTemporaryScheduleToScheduleForTeacher(semesterId, scheduleForTeacherDTO);
-    }
-
-    private ScheduleForTeacherDTO addTemporaryScheduleToScheduleForTeacher(Long semesterId, ScheduleForTeacherDTO scheduleForTeacherDTO) {
-        Map<EvenOdd, Map<DayOfWeek, List<TemporarySchedule>>> temporarySchedules = temporaryScheduleService
-                .getTemporaryScheduleForEvenOddWeeks(semesterId);
-        for (DaysOfWeekWithClassesForTeacherDTO daysOfWeekWithClassesForTeacherDTOList : scheduleForTeacherDTO.getDays()) {
-            for (ClassForTeacherScheduleDTO classForTeacherScheduleDTO : daysOfWeekWithClassesForTeacherDTOList.getEvenWeek().getPeriods()) {
-                for (LessonForTeacherScheduleDTO lessonForTeacherScheduleDTO : classForTeacherScheduleDTO.getLessons()) {
-                    if (lessonForTeacherScheduleDTO != null && !temporarySchedules.get(EvenOdd.EVEN).isEmpty() &&
-                            temporarySchedules.get(EvenOdd.EVEN).get(daysOfWeekWithClassesForTeacherDTOList.getDay()) != null) {
-                        TemporaryScheduleDTOForDashboard temporaryScheduleDTO = compareScheduleWithTemporarySchedule(
-                                temporarySchedules.get(EvenOdd.EVEN).get(daysOfWeekWithClassesForTeacherDTOList.getDay()),
-                                lessonForTeacherScheduleDTO.getGroup().getId(), classForTeacherScheduleDTO.getPeriod().getId(),
-                                scheduleForTeacherDTO.getTeacher().getId());
-                        if (temporaryScheduleDTO != null) {
-                            lessonForTeacherScheduleDTO.setTemporaryScheduleDTO(temporaryScheduleDTO);
-                        }
-                    }
-                }
-            }
-            for (ClassForTeacherScheduleDTO classForTeacherScheduleDTO : daysOfWeekWithClassesForTeacherDTOList.getOddWeek().getPeriods()) {
-                for (LessonForTeacherScheduleDTO lessonForTeacherScheduleDTO : classForTeacherScheduleDTO.getLessons()) {
-                    if (lessonForTeacherScheduleDTO != null && !temporarySchedules.get(EvenOdd.ODD).isEmpty() &&
-                            temporarySchedules.get(EvenOdd.ODD).get(daysOfWeekWithClassesForTeacherDTOList.getDay()) != null) {
-                        TemporaryScheduleDTOForDashboard temporaryScheduleDTO = compareScheduleWithTemporarySchedule(
-                                temporarySchedules.get(EvenOdd.ODD).get(daysOfWeekWithClassesForTeacherDTOList.getDay()),
-                                lessonForTeacherScheduleDTO.getGroup().getId(), classForTeacherScheduleDTO.getPeriod().getId(),
-                                scheduleForTeacherDTO.getTeacher().getId());
-                        if (temporaryScheduleDTO != null) {
-                            lessonForTeacherScheduleDTO.setTemporaryScheduleDTO(temporaryScheduleDTO);
-                        }
-                    }
-                }
-            }
-        }
         return scheduleForTeacherDTO;
     }
 
@@ -608,29 +494,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleRepository.getScheduleBySemester(semesterId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Map<LocalDate, Map<Period, Map<Schedule, TemporarySchedule>>> temporaryScheduleByDateRangeForTeacher(LocalDate fromDate,
-                                                                                                                LocalDate toDate, Long teacherId) {
-        log.info("In temporaryScheduleByDateRangeForTeacher with fromDate = {} and toDate = {} and teacher = {}", fromDate, toDate, teacherId);
-        List<Schedule> schedules = scheduleRepository.scheduleByDateRangeForTeacher(fromDate, toDate, teacherId);
-        List<TemporarySchedule> temporarySchedules = temporaryScheduleService.getAllByTeacherAndRange(fromDate, toDate, teacherId);
-        List<TemporarySchedule> vacationByDateRange = temporaryScheduleService.vacationByDateRange(fromDate, toDate);
-
-        List<Schedule> dateRangeSchedule = new ArrayList<>();
-        for (Schedule schedule : schedules) {
-            Hibernate.initialize(schedule.getLesson().getSemester().getPeriods());
-            Hibernate.initialize(schedule.getLesson().getSemester().getGroups());
-            if (isDateInSemesterDateRange(schedule, toDate)) {
-                dateRangeSchedule.add(schedule);
-            }
-        }
-
-        return convertToMapTemporaryScheduleDateRange(fullScheduleForTeacherByDateRange(dateRangeSchedule, fromDate, toDate),
-                temporarySchedules, vacationByDateRange);
-    }
 
     /**
      * {@inheritDoc}
@@ -783,53 +646,6 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
 
-    private Map<LocalDate, Map<Period, Map<Schedule, TemporarySchedule>>> convertToMapTemporaryScheduleDateRange(
-            Map<LocalDate, Map<Period, List<Schedule>>> scheduleByDateRange,
-            List<TemporarySchedule> temporarySchedules,
-            List<TemporarySchedule> vacationByDateRangeForTeacher
-    ) {
-        Map<LocalDate, Map<Period, Map<Schedule, TemporarySchedule>>> map = new LinkedHashMap<>();
-        for (Map.Entry<LocalDate, Map<Period, List<Schedule>>> itr : scheduleByDateRange.entrySet()) {
-            Map<Period, Map<Schedule, TemporarySchedule>> periodListHashMap = new HashMap<>();
-
-            for (Map.Entry<Period, List<Schedule>> entry : itr.getValue().entrySet()) {
-                Map<Schedule, TemporarySchedule> temporaryScheduleMap = new LinkedHashMap<>();
-
-                for (Schedule schedule : entry.getValue()) {
-                    TemporarySchedule temporarySchedule = temporarySchedules.stream().filter(temporarySchedule1 ->
-                            temporarySchedule1.getScheduleId().equals(schedule.getId()) &&
-                                    temporarySchedule1.getSemester().getId().equals(schedule.getLesson().getSemester().getId())
-                                    && temporarySchedule1.getDate().equals(itr.getKey())
-
-                    ).findFirst().orElse(vacationByDateRangeForTeacher.stream().filter(temporarySchedule1 ->
-                            temporarySchedule1.getScheduleId() != null &&
-                                    temporarySchedule1.getScheduleId().equals(schedule.getId()) &&
-                                    temporarySchedule1.getDate().equals(itr.getKey()) &&
-                                    temporarySchedule1.getSemester().getId().equals(schedule.getLesson().getSemester().getId())
-
-                    ).findFirst().orElse(vacationByDateRangeForTeacher.stream().filter(temporarySchedule1 ->
-                            temporarySchedule1.getPeriod() == null &&
-                                    temporarySchedule1.getScheduleId() == null &&
-                                    temporarySchedule1.getTeacher() != null &&
-                                    temporarySchedule1.getTeacher().getId().equals(schedule.getLesson().getTeacher().getId()) &&
-                                    temporarySchedule1.getDate().equals(itr.getKey()) &&
-                                    temporarySchedule1.getSemester().getId().equals(schedule.getLesson().getSemester().getId())
-
-                    ).findFirst().orElse(vacationByDateRangeForTeacher.stream().filter(temporarySchedule1 ->
-                            temporarySchedule1.getScheduleId() == null &&
-                                    temporarySchedule1.getDate().equals(itr.getKey()) &&
-                                    temporarySchedule1.getSemester().getId().equals(schedule.getLesson().getSemester().getId())
-
-                    ).findFirst().orElse(new TemporarySchedule()))));
-                    temporaryScheduleMap.put(schedule, temporarySchedule);
-                }
-                periodListHashMap.put(entry.getKey(), temporaryScheduleMap);
-            }
-            map.put(itr.getKey(), periodListHashMap);
-        }
-        return map;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -874,7 +690,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         return scheduleRepository
                 .getAllOrdered(semesterId)
                 .stream()
-                .collect(Collectors.groupingBy(Schedule::getRoom, LinkedHashMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(e -> e.getRoom(), LinkedHashMap::new, Collectors.toList()));
     }
 }
 

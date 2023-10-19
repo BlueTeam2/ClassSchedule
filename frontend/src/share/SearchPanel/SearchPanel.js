@@ -16,7 +16,7 @@ import {
     COMMON_SHOW_ENABLED,
 } from '../../constants/translationLabels/common';
 
-const SearchPanel = ({ SearchChange, showDisabled, showArchived, forLessons }) => {
+    export function SearchPanel (SearchChange, showDisabled, showArchived, forLessons){
     const { t } = useTranslation('formElements');
     const [term, setTerm] = useState('');
 

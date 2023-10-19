@@ -46,6 +46,7 @@ public class CacheConfiguration {
 
         config.put("map", new CacheConfig(ttl, maxIdleTime));
         config.put("semesterList", new CacheConfig(ttl, maxIdleTime));
+        config.put("scheduleList", new CacheConfig(ttl, maxIdleTime));
         config.put("lessons", new CacheConfig(ttl, maxIdleTime));
         config.put("schedules", new CacheConfig(ttl, maxIdleTime));
         config.put("semesterSchedules", new CacheConfig(ttl, maxIdleTime));

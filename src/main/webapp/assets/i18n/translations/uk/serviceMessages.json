@@ -6,15 +6,17 @@
     "deleted_label": "видалено",
     "group_label": "груп(и)",
     "back_end_success_operation": "{{cardType}} було успішно {{actionType}}",
+    "back_end_action_success": "Елемент було успішно {{actionType}}",
     "file_backend_success_operation": "{{cardType}} {{actionType}}",
-    "students_exist_in_this_group":"{{cardType}} уже {{actionType}} цій групі",
-    "group_exist_in_this_semester":"{{cardType}} уже {{actionType}} цьому семестру",
+    "students_exist_in_this_group": "{{cardType}} уже {{actionType}} цій групі",
+    "group_exist_in_this_semester": "{{cardType}} уже {{actionType}} цьому семестру",
     "chosen_semester_has_not_groups": "{{cardType}} не має {{actionType}}",
     "semester_service_is_active": "Цей семестр не може бути видалений, оскільки він є поточним",
     "semester_service_not_as_begin_or_end": "Рік семестру не співпадає із початком або кінцем семестру. Ви впевнені, що хочете створити його?",
     "successfully_merged": "Користувач з викладачем успішно з'єднані",
     "copied_label": "скопійовано",
     "cleared_label": "очищено",
-    "student_label": "належ(и/а)ть",
-    "archived_label": "заархівовано"
+    "exist_label": "належ(и/а)ть",
+    "archived_label": "заархівовано",
+    "moved_to_group": "переміщено в групу"
 }

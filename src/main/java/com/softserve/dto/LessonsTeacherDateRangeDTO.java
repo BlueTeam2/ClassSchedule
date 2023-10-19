@@ -6,11 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
-public class LessonsTeacherDateRangeDTO {
+public class LessonsTeacherDateRangeDTO implements Serializable {
     @JsonProperty(value = "subject_for_site")
     private String subjectForSite;
     @JsonProperty(value = "group_name")

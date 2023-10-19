@@ -183,7 +183,6 @@ public class ScheduleServiceTest {
         when(userService.getById(1L)).thenReturn(user);
         when(teacherMapper.teacherToTeacherDTO(any())).thenReturn(teacherDTO);
         when(scheduleRepository.getDaysWhenTeacherHasClassesBySemester(anyLong(), anyLong())).thenReturn(dayOfWeeks);
-        when(temporaryScheduleService.getTemporaryScheduleForEvenOddWeeks(any())).thenReturn(temporarySchedules);
         doNothing().when(mailService).send(anyString(), anyString(), anyString(), anyString(), any());
         scheduleServiceImpl.sendScheduleToTeacher(1L, 1L, Locale.ENGLISH);
         verify(mailService, times(1)).send(anyString(), anyString(), anyString(), anyString(), any());
@@ -222,6 +221,7 @@ public class ScheduleServiceTest {
     public void getAllOrderedByRoomsDaysPeriodsTest() {
         Room room = new Room();
         room.setId(1L);
+        room.setName("Room");
         Schedule schedule = new Schedule();
         schedule.setId(1L);
         schedule.setEvenOdd(EvenOdd.ODD);
@@ -229,6 +229,7 @@ public class ScheduleServiceTest {
         schedule.setRoom(room);
         Room room2 = new Room();
         room.setId(2L);
+        room.setName("Room2");
         Schedule schedule2 = new Schedule();
         schedule2.setId(2L);
         schedule2.setEvenOdd(EvenOdd.ODD);

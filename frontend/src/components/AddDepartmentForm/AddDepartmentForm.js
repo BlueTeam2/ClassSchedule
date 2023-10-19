@@ -17,7 +17,7 @@ import {
     NAME_LABEL,
 } from '../../constants/translationLabels/formElements';
 
-const AddDepartment = (props) => {
+export function AddDepartment(props){
     const { t } = useTranslation('formElements');
     const { handleSubmit, clear, department, pristine, submitting, editDepartment, initialize } =
         props;
@@ -71,7 +71,7 @@ const AddDepartment = (props) => {
             </form>
         </Card>
     );
-};
+}
 
 const mapStateToProps = (state) => ({
     department: state.departments.department,

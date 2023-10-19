@@ -6,11 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class LessonBaseDTO {
+public class LessonBaseDTO implements Serializable {
     private Long id;
     private int hours;
     private String linkToMeeting;

@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class LessonsInRoomScheduleDTO {
+public class LessonsInRoomScheduleDTO implements Serializable {
 
     private List<LessonsListInRoomScheduleDTO> lessons;
     @JsonProperty("class_id")

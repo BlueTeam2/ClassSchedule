@@ -92,7 +92,6 @@ const Schedule = (props) => {
                                     </span>
                                     {allLessons.map((lesson) => {
                                         return (
-                                            // eslint-disable-next-line jsx-a11y/mouse-events-have-key-events
                                             <div
                                                 key={`${group.id}-${lesson.id}-${lesson.week}`}
                                                 className="board-container"

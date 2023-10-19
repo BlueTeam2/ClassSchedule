@@ -9,35 +9,35 @@ import SnackbarComponent from './share/Snackbar/SnackbarComponent';
 import SuccessSnackbar from './components/SuccessSnackbar/SuccessSnackbar';
 import './App.scss';
 
-const App = (props) => {
-    const { isSnackbarOpen, snackbarType, snackbarMessage } = props;
-    const handleSnackbarClose = (event, reason) => {
-        if (!reason === 'clickaway') {
-            return;
-        }
+export function App(props) {
+  const { isSnackbarOpen, snackbarType, snackbarMessage } = props;
+  const handleSnackbarClose = (event, reason) => {
+    if (!reason === 'clickaway') {
+      return;
+    }
 
-        handleSnackbarCloseService();
-    };
+    handleSnackbarCloseService();
+  };
 
-    useEffect(() => {
-        props.onTryAutoLogin();
-    }, [props]);
+  useEffect(() => {
+    props.onTryAutoLogin();
+  }, [props]);
 
-    return (
-        <Suspense fallback={null}>
-            <div className="container">
-                <Routers />
-                <SuccessSnackbar />
-                <SnackbarComponent
-                    message={snackbarMessage}
-                    type={snackbarType}
-                    isOpen={isSnackbarOpen}
-                    handleSnackbarClose={handleSnackbarClose}
-                />
-            </div>
-        </Suspense>
+  return (
+    <Suspense fallback={null}>
+      <div className="container">
+        <Routers />
+        <SuccessSnackbar />
+        <SnackbarComponent
+          message={snackbarMessage}
+          type={snackbarType}
+          isOpen={isSnackbarOpen}
+          handleSnackbarClose={handleSnackbarClose}
+        />
+      < /div>
+        < /Suspense>
     );
-};
+}
 
 const mapStateToProps = (state) => ({
     isSnackbarOpen: state.snackbar.isSnackbarOpen,

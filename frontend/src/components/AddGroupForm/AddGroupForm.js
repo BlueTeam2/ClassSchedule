@@ -16,7 +16,7 @@ import renderTextField from '../../share/renderedFields/input';
 import { minLengthValue, required, uniqueGroup } from '../../validation/validateFields';
 import './AddGroupForms.scss';
 
-export const AddGroup = (props) => {
+export function AddGroup(props){
     const {
         clearGroupStart,
         submitGroupStart,

@@ -3,6 +3,7 @@ package com.softserve.dto;
 import com.softserve.entity.enums.EvenOdd;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.DayOfWeek;
 
 @Getter
@@ -10,7 +11,7 @@ import java.time.DayOfWeek;
 @EqualsAndHashCode
 @NoArgsConstructor
 @ToString
-public class ScheduleWithoutSemesterDTO {
+public class ScheduleWithoutSemesterDTO implements Serializable {
     private Long id;
     private DayOfWeek dayOfWeek;
     private EvenOdd evenOdd;

@@ -13,8 +13,8 @@ import com.softserve.service.SubjectService;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+//import org.springframework.cache.annotation.CacheEvict;
+//import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,7 +56,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable("lessons")
+    //@Cacheable("lessons")
     public List<Lesson> getAll() {
         log.info("In getAll()");
         List<Lesson> lessons = lessonRepository.getAll();
@@ -72,7 +72,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "lessons", key = "#teacherId")
+    //@Cacheable(value = "lessons", key = "#teacherId")
     public List<Lesson> getLessonByTeacher(Long teacherId) {
         log.info("In getLessonByTeacher()");
         List<Lesson> lessons = lessonRepository.getLessonByTeacher(teacherId, semesterService.getCurrentSemester().getId());
@@ -94,7 +94,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional
-    @CacheEvict(value = "lessons", allEntries = true)
+    //@CacheEvict(value = "lessons", allEntries = true)
     public Lesson save(Lesson object) {
         object.setSemester(semesterService.getCurrentSemester());
         log.info("In save(entity = [{}]", object);
@@ -115,7 +115,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional
-    @CacheEvict(value = "lessons", allEntries = true)
+    //@CacheEvict(value = "lessons", allEntries = true)
     public List<Lesson> save(List<Lesson> lessons) {
         log.info("In save(lessons = [{}])", lessons);
         List<Lesson> lessonsList = new ArrayList<>();
@@ -131,7 +131,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional
-    @CacheEvict(value = "lessons", allEntries = true)
+    //@CacheEvict(value = "lessons", allEntries = true)
     public Lesson update(Lesson lesson) {
         lesson.setSemester(semesterService.getCurrentSemester());
         log.info("In update(entity = [{}]", lesson);
@@ -157,7 +157,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional
-    @CacheEvict(value = "lessons", allEntries = true)
+    //@CacheEvict(value = "lessons", allEntries = true)
     public Lesson delete(Lesson object) {
         log.info("In delete(object = [{}])", object);
         if (object.isGrouped()) {
@@ -172,7 +172,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "lessons", key = "#groupId")
+    //@Cacheable(value = "lessons", key = "#groupId")
     public List<Lesson> getAllForGroup(Long groupId) {
         log.info("In getAllForGroup(groupId = [{}])", groupId);
         List<Lesson> lessons = lessonRepository.getAllForGroup(groupId, semesterService.getCurrentSemester().getId());
@@ -218,7 +218,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "lessons", key = "#semesterId")
+    //@Cacheable(value = "lessons", key = "#semesterId")
     public List<Lesson> getLessonsBySemester(Long semesterId) {
         log.info("In getLessonsBySemester(semesterId = [{}])", semesterId);
         List<Lesson> lessons = lessonRepository.getLessonsBySemester(semesterId);
@@ -259,7 +259,7 @@ public class LessonServiceImpl implements LessonService {
      */
     @Override
     @Transactional
-    @CacheEvict(value = "lessons", allEntries = true)
+    //@CacheEvict(value = "lessons", allEntries = true)
     public void deleteLessonBySemesterId(Long semesterId) {
         log.info("In method deleteLessonBySemesterId with semesterId = {}", semesterId);
         lessonRepository.deleteLessonsBySemesterId(semesterId);

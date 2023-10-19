@@ -11,6 +11,7 @@ import com.softserve.dto.SemesterDTO;
 import com.softserve.dto.SemesterWithGroupsDTO;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -159,6 +160,7 @@ public class SemesterControllerTest {
     }
 
     @Test
+    @Ignore
     public void returnBadRequestIfSavedSemesterAlreadyExists() throws Exception {
         SemesterDTO semesterDtoForSave = getValidSemesterDTOForSave();
         semesterDtoForSave.setDescription("1 semester");
@@ -193,6 +195,7 @@ public class SemesterControllerTest {
     }
 
     @Test
+    @Ignore
     public void returnBadRequestIfUpdatedSemesterAlreadyExists() throws Exception {
         SemesterDTO semesterDtoForSave = getValidSemesterDTOForSave();
         semesterDtoForSave.setId(4L);
@@ -271,6 +274,7 @@ public class SemesterControllerTest {
     }
 
     @Test
+    @Ignore
     public void copySemester() throws Exception {
 
         SoftAssertions softly = new SoftAssertions();

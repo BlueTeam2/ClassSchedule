@@ -12,10 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
+//import org.springframework.cache.annotation.CacheEvict;
+//import org.springframework.cache.annotation.CachePut;
+//import org.springframework.cache.annotation.Cacheable;
+//import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +54,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @Cacheable(value = "map", key = "#id")
+    //@Cacheable(value = "map", key = "#id")
     @Override
     public Semester getById(Long id) {
         log.info("In getById(id = [{}])", id);
@@ -69,7 +69,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @Cacheable(value = "semesterList")
+    //@Cacheable(value = "semesterList")
     @Override
     public List<Semester> getAll() {
         log.debug("In getAll()");
@@ -79,7 +79,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @CacheEvict(value = "semesterList", allEntries = true)
+    //@CacheEvict(value = "semesterList", allEntries = true)
     @Override
     public Semester save(Semester semester) {
         log.info("In save(entity = [{}]", semester);
@@ -170,8 +170,8 @@ public class SemesterServiceImpl implements SemesterService {
      *
      * @throws UsedEntityException if the given semester has not passed checkUpdateConstraints
      */
-    @Caching(put = {@CachePut(value = "map", key = "#semester.id")},
-            evict = {@CacheEvict(value = "semesterList", allEntries = true)})
+    //@Caching(put = {@CachePut(value = "map", key = "#semester.id")},
+     //       evict = {@CacheEvict(value = "semesterList", allEntries = true)})
     @Override
     public Semester update(Semester semester) {
         log.debug("In update(entity = [{}]", semester);
@@ -184,7 +184,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @CacheEvict(value = "map", key = "#object.id")
+    //@CacheEvict(value = "map", key = "#object.id")
     @Override
     public Semester delete(Semester object) {
         log.debug("In delete(object = [{}])", object);
@@ -239,13 +239,13 @@ public class SemesterServiceImpl implements SemesterService {
      * @param year        the year of the semester
      * @return {@code true} if the given semester exists in the repository
      */
-    private boolean isSemesterExists(long semesterId, String description, int year) {
+    private boolean isSemesterExists(Long semesterId, String description, int year) {
         log.info("In isSemesterExists (semesterId = [{}],description = [{}], year = [{}])", semesterId, description, year);
         Semester existingSemester = semesterRepository.getSemesterByDescriptionAndYear(description, year).orElse(null);
         if (existingSemester == null) {
             return false;
         }
-        return existingSemester.getId() != semesterId;
+        return existingSemester.getId().equals(semesterId);
     }
 
     /**
@@ -305,7 +305,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @CacheEvict(value = "semesterList", allEntries = true)
+    //@CacheEvict(value = "semesterList", allEntries = true)
     @Override
     public Semester changeCurrentSemester(Long semesterId) {
         log.debug("In changeCurrentSemester(Long semesterId = [{}])", semesterId);
@@ -317,7 +317,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @CacheEvict(value = "semesterList", allEntries = true)
+    //@CacheEvict(value = "semesterList", allEntries = true)
     @Override
     public Semester changeDefaultSemester(Long semesterId) {
         log.debug("In changeDefaultSemester(Long semesterId = [{}])", semesterId);
@@ -329,7 +329,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @CacheEvict(value = "semesterList", allEntries = true)
+    //@CacheEvict(value = "semesterList", allEntries = true)
     @Override
     public Semester addGroupToSemester(Semester semester, Group group) {
         log.debug("In addGroupToSemester (semester = [{}], group = [{}])", semester, group);
@@ -345,7 +345,7 @@ public class SemesterServiceImpl implements SemesterService {
     /**
      * {@inheritDoc}
      */
-    @CacheEvict(value = "semesterList", allEntries = true)
+    //@CacheEvict(value = "semesterList", allEntries = true)
     @Override
     public Semester addGroupsToSemester(Semester semester, List<Long> groupIds) {
         log.info("In addGroupsToSemester (semester = [{}], groupIds = [{}])", semester, groupIds);
