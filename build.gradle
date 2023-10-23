@@ -34,6 +34,9 @@ task copyToLib(type: Copy) {
     }
 }
 test {
+    environment "POSTGRES_TEST_URL", System.getenv('POSTGRES_TEST_URL')
+    environment "POSTGRES_TEST_USERNAME", System.getenv('POSTGRES_TEST_USERNAME')
+    environment "POSTGRES_TEST_PASSWORD", System.getenv('POSTGRES_TEST_PASSWORD')
     useJUnit()
     maxHeapSize = '1G'
     finalizedBy jacocoTestReport
