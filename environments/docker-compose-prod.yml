@@ -1,0 +1,87 @@
+version: '3.5'
+
+
+services:
+  shcedule-app:
+    image: arkma/schedule-tomcat-prod:1.0
+    ports:
+      - 8888:8080
+    environment:
+      - POSTGRES_URL
+      - POSTGRES_USERNAME=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_URL
+      - MONGO_DATABASE
+      - MONGO_URL
+      - JWT_TOKEN
+      - JWT_EXPIRED
+    depends_on:
+      - postgres
+      - mongo
+      - redis
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:15.1-alpine
+    container_name: Postgres15
+    restart: always
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    expose:
+      - 5432
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s  
+    
+  mongo:
+    image: mongo:jammy
+    container_name: MongoDB
+    restart: always
+    expose:
+      - 27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD
+    networks:
+      - backend
+    volumes:
+      - mongo:/data/db
+
+  redis:
+    image: redis:alpine
+    container_name: Redis
+    restart: always
+    expose:
+      - 6379
+    volumes:
+      - redis:/root/redis
+      - ./redis/redis_data/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PORT
+      - REDIS_DATABASES
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+networks:
+  backend:
+  
+volumes:
+  postgres:
+  mongo:
+  redis:
