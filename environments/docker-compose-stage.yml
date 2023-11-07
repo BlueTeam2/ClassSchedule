@@ -1,18 +1,17 @@
 version: '3.5'
 
-
 services:
   schedule-app-test:
-    image: arkma/schedule-test:1.0
+    image: "${SCHEDULE_TEST_APP_IMAGE}"
     container_name: schedule-app-test
     restart: "no"
     environment:
       - POSTGRES_URL
-      - POSTGRES_USERNAME=${POSTGRES_ADMIN_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
       - POSTGRES_TEST_URL
-      - POSTGRES_TEST_USERNAME=${POSTGRES_ADMIN_USERNAME}
-      - POSTGRES_TEST_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
+      - POSTGRES_TEST_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_TEST_PASSWORD=${POSTGRES_PASSWORD}
       - REDIS_URL
       - MONGO_DATABASE
       - MONGO_URL
@@ -27,16 +26,14 @@ services:
     
   shcedule-app:
     container_name: shcedule-app
-    image: arkma/schedule-tomcat-prod:1.0
+    restart: always
+    image: "${SCHEDULE_APP_IMAGE}"
     ports:
-      - 8888:8080
+      - "${SCHEDULE_APP_PORT}:8080"
     environment:
       - POSTGRES_URL
-      - POSTGRES_USERNAME=${POSTGRES_ADMIN_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
-      - POSTGRES_TEST_URL
-      - POSTGRES_TEST_USERNAME=${POSTGRES_ADMIN_USERNAME}
-      - POSTGRES_TEST_PASSWORD=${POSTGRES_ADMIN_PASSWORD}
+      - POSTGRES_USERNAME
+      - POSTGRES_PASSWORD
       - REDIS_URL
       - MONGO_DATABASE
       - MONGO_URL
@@ -48,6 +45,16 @@ services:
       - redis
     networks:
       - backend
+    healthcheck:
+      test: 
+        [
+          "CMD-SHELL",
+          "curl --output /dev/null --silent --fail 127.0.0.1:8080/public/semesters || exit 1"
+          ]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 30s  
 
   postgres:
     image: postgres:15.1-alpine
@@ -56,15 +63,14 @@ services:
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      - POSTGRES_ADMIN_USERNAME
-      - POSTGRES_ADMIN_PASSWORD
+      - POSTGRES_USERNAME
       - POSTGRES_DATABASE
       - POSTGRES_TEST_DATABASE
     expose:
       - 5432
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d
+      - "${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d"
     networks:
       - backend
     healthcheck:
@@ -87,6 +93,20 @@ services:
       - backend
     volumes:
       - mongo:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "127.0.0.1/test",
+          "--eval",
+          "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   redis:
     image: redis:alpine
@@ -96,7 +116,6 @@ services:
       - 6379
     volumes:
       - redis:/root/redis
-      - ./redis/redis_data/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
       - REDIS_PORT
       - REDIS_DATABASES

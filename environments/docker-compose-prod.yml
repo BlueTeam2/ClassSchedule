@@ -3,9 +3,11 @@ version: '3.5'
 
 services:
   shcedule-app:
-    image: arkma/schedule-tomcat-prod:1.0
+    container_name: shcedule-app
+    restart: always
+    image: "${SCHEDULE_APP_IMAGE}"
     ports:
-      - 8888:8080
+      - "${SCHEDULE_APP_PORT}:8080"
     environment:
       - POSTGRES_URL
       - POSTGRES_USERNAME=${POSTGRES_USER}
@@ -21,6 +23,16 @@ services:
       - redis
     networks:
       - backend
+    healthcheck:
+      test: 
+        [
+          "CMD-SHELL",
+          "curl --output /dev/null --silent --fail 127.0.0.1:8080/public/semesters || exit 1"
+          ]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 30s  
 
   postgres:
     image: postgres:15.1-alpine
@@ -56,6 +68,20 @@ services:
       - backend
     volumes:
       - mongo:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "127.0.0.1/test",
+          "--eval",
+          "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   redis:
     image: redis:alpine
@@ -65,7 +91,6 @@ services:
       - 6379
     volumes:
       - redis:/root/redis
-      - ./redis/redis_data/redis.conf:/usr/local/etc/redis/redis.conf
     environment:
       - REDIS_PORT
       - REDIS_DATABASES
