@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 set -e
 
@@ -7,8 +7,8 @@ POSTGRES_COMMAND="docker run -d
   --name postgres
   --hostname postgres
   --restart always
-  --env-file "$ENV_FILE"
-  -v "$POSTGRES_ENTRYPOINT_DIR:/docker-entrypoint-initdb.d"
+  --env-file $ENV_FILE
+  -v $POSTGRES_ENTRYPOINT_DIR:/docker-entrypoint-initdb.d
   -v postgres:/var/lib/postgresql/data
   --network backend
   --expose 5432
@@ -18,7 +18,7 @@ MONGO_COMMAND="docker run -d
   --name mongo
   --restart always
   --hostname mongo
-  --env-file "$ENV_FILE"
+  --env-file $ENV_FILE
   --network backend
   --expose 27017
   -v mongo:/data/db
@@ -30,17 +30,17 @@ REDIS_COMMAND="docker run -d
   --hostname redis
   --expose 6379
   -v redis:/root/redis
-  --env-file "$ENV_FILE"
+  --env-file $ENV_FILE
   --network backend
   redis:alpine"
 
 SCHEDULE_APP_COMMAND="docker run -d
   --name schedule-app
   --restart always
-  --env-file "$ENV_FILE"
+  --env-file $ENV_FILE
   --network backend
-  -p "$APP_PORT:8080"
-  "$APP_IMAGE""
+  -p $APP_PORT:8080
+  $APP_IMAGE"
   
 
 create_network() {
@@ -84,14 +84,21 @@ prune() {
     echo 'All Schedule containers, networks and volumes were successfully deleted'
 }
 
-# prune 'schedule-app redis mongo postgres' 'backend' 'redis mongo postgres' 
 
-create_network 'backend'
+OPERATION="$1"
 
-run_container 'postgres' "$POSTGRES_COMMAND"
+if [ "$OPERATION" == 'run' ]; then
+  create_network 'backend'
+  run_container 'postgres' "$POSTGRES_COMMAND"
+  run_container 'mongo' "$MONGO_COMMAND"
+  run_container 'redis' "$REDIS_COMMAND"
+  run_container 'schedule-app' "$SCHEDULE_APP_COMMAND"
 
-run_container 'mongo' "$MONGO_COMMAND"
-
-run_container 'redis' "$REDIS_COMMAND"
-
-run_container 'schedule-app' "$SCHEDULE_APP_COMMAND"
+elif [ "$OPERATION" == 'prune' ]; then
+  prune 'schedule-app redis mongo postgres' 'backend' 'redis mongo postgres' 
+  
+else
+    echo 'Specify one of the next options:
+    run: create/restart all application resources
+    prune: remove all related application resources'
+fi
