@@ -1,45 +1,98 @@
 # Class chedule
 ## General info
 This repository contains a source code of the Class Schedule Project.
-
 The main goal of the project is designing a website where the university or institute staff will be able to create, store and display their training schedules.
 
-Link to the development version of the site: https://develop-softserve.herokuapp.com/
+## Diagram 
 
-## Creating a local repository
-In order to create a local copy of the project you need:
-1. Download and install the last version of Git https://git-scm.com/downloads
-2. Open a terminal and go to the directory where you want to clone the files. 
-3. Run the following command. Git automatically creates a folder with the repository name and downloads the files there.
+<img src="./java_web_app.png" alt= “” width="476px" height="574px">
 
-       git clone https://gitlab.com/class_schedule/class_schedule.backend.git
-4. Enter your username and password if GitLab requests.
+## First, download and install Vagrant on your system. You can use the following commands to install Vagrant on a Debian-based system:
 
-## Database
-1. Download and install the last version of PostgreSQL https://www.postgresql.org/download/
-2. Configure your username, password and connection url in `hibernate.properties` file
+Copy code
+`wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb`
+`sudo apt install ./vagrant_2.2.19_x86_64.deb`
+Verify Vagrant Installation and Install Vagrant Plugin
 
-##Redis
-1. Download and install the last version of Redis  https://redis.io/download
-2. Configure connection url in `cache.properties` file
+## After installation, verify that Vagrant is correctly installed with:
 
-## Starting backend server using IntelliJ IDEA and Tomcat
-1. Download and install the Ultimate version of IntelliJ IDEA (alternatively you can use a trial or EAP version) https://www.jetbrains.com/idea/download
-2. Download and install Tomcat 9.0.50 https://tomcat.apache.org/download-90.cgi
-3. Start the IDE and open class_schedule.backend project from the folder where you previously download it.
-4. Make sure Tomcat and TomEE Integration is checked (`File –>> Settings –>> Plugins`).
-5. `Run –>> Edit Configurations…`
-6. Clicks `+` icon, select `Tomcat Server –>> Local`
-7. Clicks on “Server” tab, then press `Configure...` button and select the directory with Tomcat server
-8. Clicks on “Deployment” tab, then press `+` icon to select an artifact to deploy, and select `Gradle:com.softserve:class_schedule.war`
-9. Press OK to save the configuration
-10. `Run –>> Run 'Tomcat 9.0.50'` to start the backend server
+Copy code
+`vagrant --version`
+Additionally, install the vagrant-docker-compose plugin:
 
-## Starting frontend server using Node.js
-1. Download and install Node.js 14.17.4 LTS version https://nodejs.org/en/
-2. Open a terminal in `/frontend` directory of the downloaded project and run the following command.
+Copy code
+`vagrant plugin install vagrant-docker-compose`
+## Create .env.stage and .env.prod
+# .env.stage
+```
+#Postgres configuration
+POSTGRES_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_DATABASE
+POSTGRES_DATABASE=YOUR_POSTGRES_DATABASE
 
-       npm install
-3. After the installation is finished run the following command to start the frontend server
+POSTGRES_TEST_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_TEST_DATABASE
+POSTGRES_TEST_DATABASE=YOUR_POSTGRES_TEST_DATABASE
 
-       npm start
+POSTGRES_ADMIN_USERNAME=YOUR_POSTGRES_ADMIN_USERNAME
+POSTGRES_ADMIN_PASSWORD=YOUR_POSTGRES_ADMIN_PASSWORD
+
+POSTGRES_USER=YOUR_USER
+POSTGRES_PASSWORD=YOUR_POSTGRES_PASSWORD
+
+# Redis configuration
+REDIS_URL=redis://redis:6379
+REDIS_PORT=6379
+REDIS_DATABASES=16
+
+# Mongo configuration
+MONGO_DATABASE=YOUR_MONGO_DATABASE
+MONGO_URL=mongo
+MONGO_INITDB_ROOT_USERNAME=YOUR_MONGO_INITDB_ROOT_USERNAME
+MONGO_INITDB_ROOT_PASSWORD=YOUR_MONGO_INITDB_ROOT_PASSWORD
+
+# JWT configuration
+JWT_TOKEN=jwttoken
+JWT_EXPIRED=86400000
+```
+# .env.prod
+```
+# Postgres configuration
+POSTGRES_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_DB
+POSTGRES_USER=YOUR_POSTGRES_USER
+POSTGRES_PASSWORD=YOUR_POSTGRES_PASSWORD
+POSTGRES_DB=YOUR_POSTGRES_DB
+
+# Redis configuration
+REDIS_URL=redis://redis:6379
+REDIS_PORT=6379
+REDIS_DATABASES=16
+
+# Mongo configuration
+MONGO_DATABASE=YOUR_MONGO_DATABASE
+MONGO_URL=mongo
+MONGO_INITDB_ROOT_USERNAME=YOUR_MONGO_INITDB_ROOT_USERNAME
+MONGO_INITDB_ROOT_PASSWORD=YOUR_MONGO_INITDB_ROOT_PASSWORD
+
+# JWT configuration
+JWT_TOKEN=jwttoken
+JWT_EXPIRED=86400000
+
+```
+## Dump for DB
+
+You need initial_data.dump for DB in environments folder!!!
+
+## Starting the App
+To start the application in either a staging (stage) or production (prod) environment, follow these steps:
+
+Launch the application using Vagrant:
+
+## For the staging environment:
+
+Copy code
+`vagrant up stage`
+## For the production environment:
+
+Copy code
+`vagrant up prod`
+
+Please note that you may need to configure your Vagrantfile and Docker Compose settings to match your project requirements and dependencies. Make sure to check the project's documentation for any additional setup or configuration steps.
