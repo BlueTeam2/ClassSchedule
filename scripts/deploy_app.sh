@@ -41,7 +41,14 @@ SCHEDULE_APP_COMMAND="docker run -d
   --network backend
   -p $APP_PORT:8080
   $APP_IMAGE"
-  
+
+SCHEDULE_APP_TEST_COMMAND="docker run -d
+  --name schedule-app-test
+  --restart always
+  --env-file $ENV_FILE
+  --network backend
+  $APP_TEST_IMAGE"
+
 
 create_network() {
     network_name="$1"
@@ -93,9 +100,10 @@ if [ "$OPERATION" == 'run' ]; then
   run_container 'mongo' "$MONGO_COMMAND"
   run_container 'redis' "$REDIS_COMMAND"
   run_container 'schedule-app' "$SCHEDULE_APP_COMMAND"
+  run_container 'schedule-app-test' "$SCHEDULE_APP_TEST_COMMAND"
 
 elif [ "$OPERATION" == 'prune' ]; then
-  prune 'schedule-app redis mongo postgres' 'backend' 'redis mongo postgres' 
+  prune 'schedule-app schedule-app-test redis mongo postgres' 'backend' 'redis mongo postgres' 
   
 else
     echo 'Specify one of the next options:

@@ -7,3 +7,4 @@
 /schedule_logs
 /.env.dev
 /.env.prod
+.vagrant/
