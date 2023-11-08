@@ -19,18 +19,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push [Backend]
+      - name: Build and push [Production Version]
         uses: docker/build-push-action@v5
         with:
           push: true
-          target: backend-tomcat-dev
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/schedule-backend-dev:${{ github.sha }},
-            ${{ secrets.DOCKERHUB_USERNAME }}/schedule-backend-dev:latest
+          target: backend-tomcat-prod
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/schedule-app:${{ github.sha }},
+            ${{ secrets.DOCKERHUB_USERNAME }}/schedule-app:latest
       
-      - name: Build and push [Frontend]
+      - name: Build and push [Test Version]
         uses: docker/build-push-action@v5
         with:
           push: true
-          target: frontend-dev
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/schedule-frontend-dev:${{ github.sha }},
-            ${{ secrets.DOCKERHUB_USERNAME }}/schedule-frontend-dev-prod-v2:latest
+          target: backend-test
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/schedule-test-app:${{ github.sha }},
+            ${{ secrets.DOCKERHUB_USERNAME }}/schedule-test-app:latest
