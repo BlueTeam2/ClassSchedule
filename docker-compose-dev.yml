@@ -7,6 +7,16 @@ services:
     build: 
       context: .
       target: backend-test
+    environment:
+      - POSTGRES_URL
+      - "POSTGRES_USERNAME=${POSTGRES_USER}"
+      - POSTGRES_PASSWORD
+      - POSTGRES_TEST_URL
+      - REDIS_URL
+      - MONGO_DATABASE
+      - MONGO_URL
+      - JWT_TOKEN
+      - JWT_EXPIRED
     networks:
       - backend
     depends_on:
