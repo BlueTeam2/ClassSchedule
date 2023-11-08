@@ -5,3 +5,5 @@
 /backup
 /src/test/resources/hibernatetest.properties
 /schedule_logs
+/.env.dev
+/.env.prod
