@@ -1,7 +1,6 @@
 # Class chedule
 ## General info
 This repository contains a source code of the Class Schedule Project.
-The main goal of the project is designing a website where the university or institute staff will be able to create, store and display their training schedules.
 
 ## Diagram 
 
@@ -9,19 +8,27 @@ The main goal of the project is designing a website where the university or inst
 
 ## First, download and install Vagrant on your system. You can use the following commands to install Vagrant on a Debian-based system:
 
-Copy code
-`wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb`
-`sudo apt install ./vagrant_2.2.19_x86_64.deb`
+```wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb```
+```sudo apt install ./vagrant_2.2.19_x86_64.deb```
 Verify Vagrant Installation and Install Vagrant Plugin
+
+## Application Stack
+
+ReactJS
+Java (11)
+Gradle (7)
+Tomcat (9)
+PostgreSQL (15)
+MongoDB
+Redis
+Docker
 
 ## After installation, verify that Vagrant is correctly installed with:
 
-Copy code
-`vagrant --version`
+```vagrant --version```
 Additionally, install the vagrant-docker-compose plugin:
 
-Copy code
-`vagrant plugin install vagrant-docker-compose`
+```vagrant plugin install vagrant-docker-compose```
 ## Create .env.stage and .env.prod
 # .env.stage
 ```
@@ -81,18 +88,16 @@ JWT_EXPIRED=86400000
 
 You need initial_data.dump for DB in environments folder!!!
 
-## Starting the App
+# Starting the App
 To start the application in either a staging (stage) or production (prod) environment, follow these steps:
 
 Launch the application using Vagrant:
 
 ## For the staging environment:
 
-Copy code
-`vagrant up stage`
+```vagrant up stage```
 ## For the production environment:
 
-Copy code
-`vagrant up prod`
+```vagrant up prod```
 
 Please note that you may need to configure your Vagrantfile and Docker Compose settings to match your project requirements and dependencies. Make sure to check the project's documentation for any additional setup or configuration steps.
