@@ -1,50 +1,31 @@
 version: '3.5'
 
 services:
-  shcedule-test:
-    container_name: schedule-test
+  schedule-app-test:
+    image: "${SCHEDULE_TEST_APP_IMAGE}"
+    container_name: schedule-app-test
     restart: "no"
-    build: 
-      context: .
-      target: backend-test
     environment:
       - POSTGRES_URL
       - "POSTGRES_USERNAME=${POSTGRES_ADMIN_USERNAME}"
-      - POSTGRES_PASSWORD
+      - "POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD}"
       - POSTGRES_TEST_URL
       - REDIS_URL
       - MONGO_DATABASE
       - MONGO_URL
       - JWT_TOKEN
       - JWT_EXPIRED
-    networks:
-      - backend
     depends_on:
-      - postgres
-      - mongo
-      - redis
-
-  shcedule-web:
-    container_name: schedule-web
-    restart: always
-    build: 
-      context: .
-      target: frontend-dev
-    ports:
-      - "${SCHEDULE_WEP_PORT}:3000"
-    environment:
-      - "REACT_APP_API_BASE_URL=http://localhost:${SCHEDULE_APP_PORT}/"
+        - postgres
+        - mongo
+        - redis
     networks:
-      - frontend
-    depends_on:
-      - schedule-backend
+        - backend
 
-  schedule-backend:
-    container_name: schedule-backend
+  shcedule-app:
+    container_name: shcedule-app
     restart: always
-    build: 
-      context: .
-      target: backend-tomcat-dev
+    image: "${SCHEDULE_APP_IMAGE}"
     ports:
       - "${SCHEDULE_APP_PORT}:8080"
     environment:
@@ -56,13 +37,12 @@ services:
       - MONGO_URL
       - JWT_TOKEN
       - JWT_EXPIRED
-    networks:
-      - backend
-      - frontend
     depends_on:
       - postgres
       - mongo
       - redis
+    networks:
+      - backend
     healthcheck:
       test: 
         [
@@ -86,11 +66,10 @@ services:
       - POSTGRES_DATABASE
       - POSTGRES_TEST_DATABASE
     expose:
-      - 5432:5432
+      - 5432
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./backup/initial_data.dump:/docker-entrypoint-initdb.d/initial_data.dump
-      - ./scripts/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
+      - "${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d"
     networks:
       - backend
     healthcheck:
@@ -105,7 +84,7 @@ services:
     container_name: MongoDB
     restart: always
     expose:
-      - 27017:27017
+      - 27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME
       - MONGO_INITDB_ROOT_PASSWORD
@@ -133,7 +112,7 @@ services:
     container_name: Redis
     restart: always
     expose:
-      - 6379:6379
+      - 6379
     volumes:
       - redis:/root/redis
     environment:
@@ -150,7 +129,6 @@ services:
 
 networks:
   backend:
-  frontend:
   
 volumes:
   postgres:

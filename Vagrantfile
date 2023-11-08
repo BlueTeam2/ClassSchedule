@@ -5,6 +5,7 @@ STAGE_CPU_CNT = "2"
 PROD_RAM_MB = "2048"
 PROD_CPU_CNT = "2"
 
+VM_PROVIDER = "vmware_desktop" # Options: "vmware_desktop", "virtualbox"
 # Project configuration
 DOCKER_FILES = "/home/vagrant"
 POSTGRES_ENTRYPOINT_DIR = "#{DOCKER_FILES}/dump"
@@ -38,41 +39,41 @@ SCRIPT
 
 Vagrant.configure("2") do |config|
 
-  # config.vm.define "stage-compose", autostart: false do |stage|
-  #   stage.vm.box = "generic/ubuntu2204"
-  #   stage.vm.box_download_options = {"ssl-revoke-best-effort" => true}
+  config.vm.define "stage-compose", autostart: false do |stage|
+    stage.vm.box = "generic/ubuntu2204"
+    stage.vm.box_download_options = {"ssl-revoke-best-effort" => true}
 
-  #   stage.vm.provider "vmware_desktop" do |vmware|
-  #     vmware.memory = STAGE_RAM_MB
-  #     vmware.cpus = STAGE_CPU_CNT
-  #   end
-  #   # File provision
-  #   stage.vm.provision "UL_STAGE_COMPOSE", type: "file", source: "./docker-compose-stage.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
-  #   stage.vm.provision "UL_STAGE_ENV", type: "file", source: "./.env.stage", destination: "#{DOCKER_FILES}/.env"
-  #   stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
-  #   stage.vm.provision "UL_INIT_SCRIPT", type: "file", source: "./init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
+    stage.vm.provider VM_PROVIDER do |vmware|
+      vmware.memory = STAGE_RAM_MB
+      vmware.cpus = STAGE_CPU_CNT
+    end
+    # File provision
+    stage.vm.provision "UL_STAGE_COMPOSE", type: "file", source: "docker-compose-stage.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
+    stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
+    stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
+    stage.vm.provision "UL_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
 
-  #   # Docker provision
-  #   stage.vm.provision :docker
-  #   stage.vm.provision :docker_compose, yml: "#{DOCKER_FILES}/docker-compose.yml", run: "always", env: {
-  #     "SCHEDULE_APP_IMAGE" => SCHEDULE_APP_IMAGE,
-  #     "SCHEDULE_TEST_APP_IMAGE" => SCHEDULE_TEST_APP_IMAGE,
-  #     "POSTGRES_ENTRYPOINT_DIR" => POSTGRES_ENTRYPOINT_DIR,
-  #     "SCHEDULE_APP_PORT" => SCHEDULE_APP_PORT
-  #   }
+    # Docker provision
+    stage.vm.provision :docker
+    stage.vm.provision :docker_compose, yml: "#{DOCKER_FILES}/docker-compose.yml", run: "always", env: {
+      "SCHEDULE_APP_IMAGE" => SCHEDULE_APP_IMAGE,
+      "SCHEDULE_TEST_APP_IMAGE" => SCHEDULE_TEST_APP_IMAGE,
+      "POSTGRES_ENTRYPOINT_DIR" => POSTGRES_ENTRYPOINT_DIR,
+      "SCHEDULE_APP_PORT" => SCHEDULE_APP_PORT
+    }
 
-  #   # Shell provision
-  #   stage.vm.provision "CHECK_APP_TESTS", type: "shell", inline: $app_test_results, env: {
-  #     "TEST_CONTAINER_NAME" => TEST_CONTAINER_NAME
-  #   }
-  #   stage.vm.provision "shell", inline: $app_running_msg
-  # end
+    # Shell provision
+    stage.vm.provision "CHECK_APP_TESTS", type: "shell", inline: $app_test_results, env: {
+      "TEST_CONTAINER_NAME" => TEST_CONTAINER_NAME
+    }
+    stage.vm.provision "shell", inline: $app_running_msg
+  end
 
   config.vm.define "stage-docker-run", autostart: false do |stage|
     stage.vm.box = "generic/ubuntu2204"
     stage.vm.box_download_options = {"ssl-revoke-best-effort" => true}
 
-    stage.vm.provider "vmware_desktop" do |vmware|
+    stage.vm.provider VM_PROVIDER do |vmware|
       vmware.memory = STAGE_RAM_MB
       vmware.cpus = STAGE_CPU_CNT
     end
@@ -87,8 +88,8 @@ Vagrant.configure("2") do |config|
       "POSTGRES_ENTRYPOINT_DIR" => POSTGRES_ENTRYPOINT_DIR,
       "ENV_FILE" => "#{DOCKER_FILES}/.env",
       "APP_PORT" => SCHEDULE_APP_PORT,
-      "APP_IMAGE" => SCHEDULE_APP_IMAGE,
-      "APP_TEST_IMAGE" => SCHEDULE_TEST_APP_IMAGE
+      "SCHEDULE_APP_IMAGE" => SCHEDULE_APP_IMAGE,
+      "SCHEDULE_TEST_APP_IMAGE" => SCHEDULE_TEST_APP_IMAGE
       }, args: ["run"]
     stage.vm.provision "shell", inline: $app_running_msg
   end
@@ -98,7 +99,7 @@ Vagrant.configure("2") do |config|
     prod.vm.box = "generic/ubuntu2204"
     prod.vm.box_download_options = {"ssl-revoke-best-effort" => true}
 
-    prod.vm.provider "vmware_desktop" do |vmware|
+    prod.vm.provider VM_PROVIDER do |vmware|
       vmware.memory = PROD_RAM_MB
       vmware.cpus = PROD_CPU_CNT
     end

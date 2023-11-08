@@ -40,14 +40,14 @@ SCHEDULE_APP_COMMAND="docker run -d
   --env-file $ENV_FILE
   --network backend
   -p $APP_PORT:8080
-  $APP_IMAGE"
+  $SCHEDULE_APP_IMAGE"
 
 SCHEDULE_APP_TEST_COMMAND="docker run -d
   --name schedule-app-test
   --restart always
   --env-file $ENV_FILE
   --network backend
-  $APP_TEST_IMAGE"
+  $SCHEDULE_TEST_APP_IMAGE"
 
 
 create_network() {
