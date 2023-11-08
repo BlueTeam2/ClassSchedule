@@ -9,7 +9,7 @@ services:
       target: backend-test
     environment:
       - POSTGRES_URL
-      - "POSTGRES_USERNAME=${POSTGRES_USER}"
+      - "POSTGRES_USERNAME=${POSTGRES_ADMIN_USERNAME}"
       - POSTGRES_PASSWORD
       - POSTGRES_TEST_URL
       - REDIS_URL
