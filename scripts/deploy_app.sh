@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 
 if [ "$#" -eq 2 ]; then
@@ -111,7 +111,7 @@ DEV_FRONTEND_RUN_COMMAND="docker run -d
 stage_create_network() {
     network_name="$1"
 
-    if docker network ls | awk '{print $2}' | grep -q "$network_name"; then
+    if docker network ls | awk '{print $2}' | grep -q "^${network_name}$"; then
         echo "Network '$network_name' already exists"
     else
         echo "Network '$network_name' will be created..."
@@ -123,12 +123,12 @@ misc_run_container() {
     container_name="$1"
     run_command="$2"
 
-    if [ -n "$(docker ps -q -f name="$container_name")" ]; then
+    if [ -n "$(docker ps -q -f name="^${container_name}$")" ]; then
         echo "Container '$container_name' is already running"
         return 0
     fi
 
-    if [ -n "$(docker ps -a -q -f name="$container_name")" ]; then
+    if [ -n "$(docker ps -a -q -f name="^${container_name}$")" ]; then
         echo "Container '$container_name' already exists. Restarting it..."
         docker restart "$container_name" >/dev/null
     else
