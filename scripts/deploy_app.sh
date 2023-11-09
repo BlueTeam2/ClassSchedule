@@ -7,7 +7,6 @@ if [ "$#" -eq 2 ]; then
     ENV_FILE="$1"
     OPERATION="$2"
     source "$ENV_FILE" 2>/dev/null || echo '[ERROR] Something wrong with the environment file!'
-    exit 1
 else
     echo -e "Usage: $0 <PATH_TO_ENV_FILE> <OPERATION>\n"
     echo 'Specify one of the next OPERATION:
@@ -15,6 +14,7 @@ else
         run-dev: create/restart all application containers for Dev environment
         prune-stage: remove all related application resources for Stage envirionment
         prune-dev: remove all related application resources for Dev envirionment'
+    exit 1
 fi
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
