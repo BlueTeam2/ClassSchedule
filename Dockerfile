@@ -35,7 +35,7 @@ RUN gradle assemble
 FROM backend-build as backend-build-prod
 WORKDIR /home/gradle/src/main/webapp/
 ARG FRONT_WORK_DIR
-RUN rm -r ./* && \
+RUN rm -rf ./* && \
     mkdir -p ./WEB-INF/view/
 COPY --from=frontend-prod ${FRONT_WORK_DIR}/build/ .
 RUN mv *.* ./WEB-INF/view/
