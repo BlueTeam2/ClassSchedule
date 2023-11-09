@@ -9,8 +9,8 @@ services:
       - "${SCHEDULE_APP_PORT}:8080"
     environment:
       - POSTGRES_URL
-      - "POSTGRES_USERNAME=${POSTGRES_USER}"
-      - POSTGRES_PASSWORD
+      - POSTGRES_ADMIN
+      - POSTGRES_ADMIN_PASSWORD
       - REDIS_URL
       - MONGO_DATABASE
       - MONGO_URL
@@ -40,11 +40,14 @@ services:
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
-      - POSTGRES_DB
+      - POSTGRES_ADMIN
+      - POSTGRES_ADMIN_PASSWORD
+      - POSTGRES_DATABASE
     expose:
       - 5432
     volumes:
       - postgres:/var/lib/postgresql/data
+      - "${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d"
     networks:
       - backend
     healthcheck:

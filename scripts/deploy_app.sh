@@ -1,7 +1,5 @@
 #!/bin/bash
-
 set -e
-
 
 POSTGRES_COMMAND="docker run -d
   --name postgres
