@@ -1,18 +1,10 @@
-# Class chedule
+# Class schedule
 ## General info
 This repository contains the Class Schedule Project made by Blue Team.
 
 ## Diagram 
 
 <img src="./java_web_app.png" alt= “” width="476px" height="574px">
-
-# First, download and install Vagrant on your system:
-
-```wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb```
-
-```sudo apt install ./vagrant_2.2.19_x86_64.deb```
-
-Verify Vagrant Installation and Install Vagrant Plugin
 
 ## Application Stack
 
@@ -25,7 +17,15 @@ Verify Vagrant Installation and Install Vagrant Plugin
 - Redis:latest
 - Docker:latest
 
-## After installation, verify that Vagrant is correctly installed with:
+# Install Vagrant on your system:
+
+```wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb```
+
+```sudo apt install ./vagrant_2.2.19_x86_64.deb```
+
+Verify Vagrant Installation and Install Vagrant Plugin
+
+Check if Vagrant installed succesfully
 
 `vagrant --version`
 
@@ -99,9 +99,7 @@ Launch the application using Vagrant:
 
 ## For the staging environment:
 
-`vagrant up stage`
+`vagrant up stage-compose`
 ## For the production environment:
 
 `vagrant up prod`
-
-Please note that you may need to configure your Vagrantfile and Docker Compose settings to match your project requirements and dependencies. Make sure to check the project's documentation for any additional setup or configuration steps.
