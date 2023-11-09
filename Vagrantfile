@@ -64,6 +64,27 @@ Vagrant.configure("2") do |config|
     stage.vm.provision "shell", inline: $app_running_msg
   end
 
+  config.vm.define "stage-docker-run", autostart: false do |stage|
+    stage.vm.box = "generic/ubuntu2204"
+    stage.vm.box_download_options = {"ssl-revoke-best-effort" => true}
+
+    stage.vm.provider VM_PROVIDER do |vmware|
+      vmware.memory = STAGE_RAM_MB
+      vmware.cpus = STAGE_CPU_CNT
+    end
+    # File provision
+    stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
+    stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
+    stage.vm.provision "UL_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
+
+    # Docker provision
+    stage.vm.provision "INSTALL_DOCKER", type: :docker    
+    stage.vm.provision "DEPLOY_APP", type: "shell", after: "INSTALL_DOCKER", path: "./scripts/deploy_app.sh", env: {
+      "POSTGRES_ENTRYPOINT_DIR" => POSTGRES_ENTRYPOINT_DIR
+      }, args: ["#{DOCKER_FILES}/.env","run-stage"]
+    stage.vm.provision "shell", inline: $app_running_msg
+  end
+
   config.vm.define "prod", autostart: false do |prod|
     prod.vm.box = "generic/ubuntu2204"
     prod.vm.box_download_options = {"ssl-revoke-best-effort" => true}
