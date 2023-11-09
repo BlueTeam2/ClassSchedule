@@ -1,27 +1,29 @@
 # Class chedule
 ## General info
-This repository contains a source code of the Class Schedule Project.
+This repository contains the Class Schedule Project made by Blue Team.
 
 ## Diagram 
 
 <img src="./java_web_app.png" alt= “” width="476px" height="574px">
 
-# First, download and install Vagrant on your system. You can use the following commands to install Vagrant on a Debian-based system:
+# First, download and install Vagrant on your system:
 
 ```wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb```
+
 ```sudo apt install ./vagrant_2.2.19_x86_64.deb```
+
 Verify Vagrant Installation and Install Vagrant Plugin
 
 ## Application Stack
 
-ReactJS
-Java (11)
-Gradle (7)
-Tomcat (9)
-PostgreSQL (15)
-MongoDB:latest
-Redis:latest
-Docker:latest
+- ReactJS
+- Java (11)
+- Gradle (7)
+- Tomcat (9)
+- PostgreSQL (15)
+- MongoDB:latest
+- Redis:latest
+- Docker:latest
 
 ## After installation, verify that Vagrant is correctly installed with:
 
