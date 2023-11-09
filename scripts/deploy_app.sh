@@ -59,12 +59,12 @@ STAGE_SCHEDULE_RUN_COMMAND="docker run -d
     --restart always
     --env-file $ENV_FILE
     --network backend
-    -p $APP_PORT:8080
+    -p $SCHEDULE_APP_PORT:8080
     $SCHEDULE_APP_IMAGE"
 
 STAGE_SCHEDULE_TEST_RUN_COMMAND="docker run -d
     --name schedule-app-test
-    --restart always
+    --restart no
     --env-file $ENV_FILE
     --network backend
     $SCHEDULE_TEST_APP_IMAGE"
