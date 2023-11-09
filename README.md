@@ -6,7 +6,7 @@ This repository contains a source code of the Class Schedule Project.
 
 <img src="./java_web_app.png" alt= “” width="476px" height="574px">
 
-## First, download and install Vagrant on your system. You can use the following commands to install Vagrant on a Debian-based system:
+# First, download and install Vagrant on your system. You can use the following commands to install Vagrant on a Debian-based system:
 
 ```wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb```
 ```sudo apt install ./vagrant_2.2.19_x86_64.deb```
@@ -19,18 +19,20 @@ Java (11)
 Gradle (7)
 Tomcat (9)
 PostgreSQL (15)
-MongoDB
-Redis
-Docker
+MongoDB:latest
+Redis:latest
+Docker:latest
 
 ## After installation, verify that Vagrant is correctly installed with:
 
-```vagrant --version```
+`vagrant --version`
+
 Additionally, install the vagrant-docker-compose plugin:
 
-```vagrant plugin install vagrant-docker-compose```
-## Create .env.stage and .env.prod
-# .env.stage
+`vagrant plugin install vagrant-docker-compose`
+
+# Create .env.stage and .env.prod
+## .env.stage
 ```
 #Postgres configuration
 POSTGRES_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_DATABASE
@@ -57,10 +59,10 @@ MONGO_INITDB_ROOT_USERNAME=YOUR_MONGO_INITDB_ROOT_USERNAME
 MONGO_INITDB_ROOT_PASSWORD=YOUR_MONGO_INITDB_ROOT_PASSWORD
 
 # JWT configuration
-JWT_TOKEN=jwttoken
-JWT_EXPIRED=86400000
+JWT_TOKEN=YOUR_JWT_TOKEN
+JWT_EXPIRED=YOUR_JWT_EXPIRED
 ```
-# .env.prod
+## .env.prod
 ```
 # Postgres configuration
 POSTGRES_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_DB
@@ -80,8 +82,8 @@ MONGO_INITDB_ROOT_USERNAME=YOUR_MONGO_INITDB_ROOT_USERNAME
 MONGO_INITDB_ROOT_PASSWORD=YOUR_MONGO_INITDB_ROOT_PASSWORD
 
 # JWT configuration
-JWT_TOKEN=jwttoken
-JWT_EXPIRED=86400000
+JWT_TOKEN=YOUR_JWT_TOKEN
+JWT_EXPIRED=YOUR_JWT_EXPIRED
 
 ```
 ## Dump for DB
@@ -95,9 +97,9 @@ Launch the application using Vagrant:
 
 ## For the staging environment:
 
-```vagrant up stage```
+`vagrant up stage`
 ## For the production environment:
 
-```vagrant up prod```
+`vagrant up prod`
 
 Please note that you may need to configure your Vagrantfile and Docker Compose settings to match your project requirements and dependencies. Make sure to check the project's documentation for any additional setup or configuration steps.
