@@ -19,7 +19,6 @@ end
 
 # Script determine if tests passed
 $app_test_results = <<-'SCRIPT'
-source .env
 test_exit_code=$(docker wait schedule-app-test)
 if [ $test_exit_code -eq 0 ]; then
   echo "All tests have been passed successfully!"
@@ -31,11 +30,11 @@ SCRIPT
 
 $app_running_msg = <<-SCRIPT
 source .env
-echo "Application is avaliable at http://$(hostname -I | cut -d' ' -f1):$SCHEDULE_APP_PORT}/"
+echo "Application is avaliable at http://$(hostname -I | cut -d' ' -f1):$SCHEDULE_APP_PORT/"
 SCRIPT
 
 $docker_compose = <<-SCRIPT
-POSTGRES_ENTRYPOINT_DIR=$POSTGRES_ENTRYPOINT_DIR docker compose up -d
+POSTGRES_ENTRYPOINT_DIR=$PED docker compose up -d
 SCRIPT
 
 Vagrant.configure("2") do |config|
@@ -58,40 +57,12 @@ Vagrant.configure("2") do |config|
     stage.vm.provision :docker
 
     # Shell provision
-    # stage.vm.provision "shell", inline:$docker_compose, env:{
-    #   "POSTGRES_ENTRYPOINT_DIR" => POSTGRES_ENTRYPOINT_DIR
-    # }
-    # stage.vm.provision "shell", inline: "docker compose up -d"
-
+    stage.vm.provision "shell", inline: $docker_compose, run: "always", env:{
+      "PED" => POSTGRES_ENTRYPOINT_DIR
+    }
     stage.vm.provision "CHECK_APP_TESTS", type: "shell", inline: $app_test_results
     stage.vm.provision "shell", inline: $app_running_msg
   end
-
-  # config.vm.define "stage-docker-run", autostart: false do |stage|
-  #   stage.vm.box = "generic/ubuntu2204"
-  #   stage.vm.box_download_options = {"ssl-revoke-best-effort" => true}
-
-  #   stage.vm.provider VM_PROVIDER do |vmware|
-  #     vmware.memory = STAGE_RAM_MB
-  #     vmware.cpus = STAGE_CPU_CNT
-  #   end
-  #   # File provision
-  #   stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
-  #   stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
-  #   stage.vm.provision "UL_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
-
-  #   # Docker provision
-  #   stage.vm.provision "INSTALL_DOCKER", type: :docker    
-  #   stage.vm.provision "DEPLOY_APP", type: "shell", after: "INSTALL_DOCKER", path: "./scripts/deploy_app.sh", env: {
-  #     "POSTGRES_ENTRYPOINT_DIR" => POSTGRES_ENTRYPOINT_DIR,
-  #     "ENV_FILE" => "#{DOCKER_FILES}/.env",
-  #     "APP_PORT" => SCHEDULE_APP_PORT,
-  #     "SCHEDULE_APP_IMAGE" => SCHEDULE_APP_IMAGE,
-  #     "SCHEDULE_TEST_APP_IMAGE" => SCHEDULE_TEST_APP_IMAGE
-  #     }, args: ["run"]
-  #   stage.vm.provision "shell", inline: $app_running_msg
-  # end
-
 
   config.vm.define "prod", autostart: false do |prod|
     prod.vm.box = "generic/ubuntu2204"
@@ -104,12 +75,15 @@ Vagrant.configure("2") do |config|
     # File provision
     prod.vm.provision "UL_PROD_COMPOSE", type: "file", source: "docker-compose-prod.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
     prod.vm.provision "UL_PROD_ENV", type: "file", source: ".env.prod", destination: "#{DOCKER_FILES}/.env"
+    prod.vm.provision "UL_PROD_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
 
     # Docker provision
     prod.vm.provision :docker
-    prod.vm.provision :docker_compose, yml: "#{DOCKER_FILES}/docker-compose.yml", run: "always"
 
     # Shell provision
+    prod.vm.provision "shell", inline: $docker_compose, run: "always", env:{
+      "PED" => POSTGRES_ENTRYPOINT_DIR
+    }
     prod.vm.provision "shell", inline: $app_running_msg
   end
 

@@ -3,7 +3,6 @@
 /.idea
 /gradle
 /backup
-/src/test/resources/hibernatetest.properties
 /schedule_logs
 /.env.*
 .vagrant/
