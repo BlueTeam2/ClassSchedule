@@ -43,6 +43,3 @@ services:
       - POSTGRES_ADMIN
       - POSTGRES_ADMIN_PASSWORD
       - POSTGRES_DATABASE
-    volumes:
-      - postgres:/var/lib/postgresql/data
-      - "${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d"
