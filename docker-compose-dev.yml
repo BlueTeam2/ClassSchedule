@@ -1,7 +1,7 @@
 version: '3.5'
 
 services:
-  shcedule-test:
+  schedule-test:
     container_name: schedule-test
     restart: "no"
     build: 
@@ -24,7 +24,7 @@ services:
       - mongo
       - redis
 
-  shcedule-web:
+  schedule-web:
     container_name: schedule-web
     restart: always
     build: 
@@ -34,8 +34,6 @@ services:
       - "${SCHEDULE_WEP_PORT}:3000"
     environment:
       - "REACT_APP_API_BASE_URL=http://localhost:${SCHEDULE_APP_PORT}/"
-    networks:
-      - frontend
     depends_on:
       - schedule-backend
 
@@ -58,7 +56,6 @@ services:
       - JWT_EXPIRED
     networks:
       - backend
-      - frontend
     depends_on:
       - postgres
       - mongo
@@ -75,9 +72,9 @@ services:
       start_period: 30s  
 
   postgres:
-    image: postgres:15.1-alpine
-    container_name: Postgres15
-    restart: always
+    extends:
+      file: docker-compose-deps.yml
+      service: postgres
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -85,75 +82,10 @@ services:
       - POSTGRES_ADMIN_PASSWORD
       - POSTGRES_DATABASE
       - POSTGRES_TEST_DATABASE
-    expose:
+    ports:
       - 5432:5432
     volumes:
       - postgres:/var/lib/postgresql/data
       - ./backup/initial_data.dump:/docker-entrypoint-initdb.d/initial_data.dump
       - ./scripts/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
-      start_period: 80s  
     
-  mongo:
-    image: mongo:jammy
-    container_name: MongoDB
-    restart: always
-    expose:
-      - 27017:27017
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME
-      - MONGO_INITDB_ROOT_PASSWORD
-    networks:
-      - backend
-    volumes:
-      - mongo:/data/db
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mongosh",
-          "--quiet",
-          "127.0.0.1/test",
-          "--eval",
-          "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
-
-  redis:
-    image: redis:alpine
-    container_name: Redis
-    restart: always
-    expose:
-      - 6379:6379
-    volumes:
-      - redis:/root/redis
-    environment:
-      - REDIS_PORT
-      - REDIS_DATABASES
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
-      start_period: 80s
-
-networks:
-  backend:
-  frontend:
-  
-volumes:
-  postgres:
-  mongo:
-  redis:
-  

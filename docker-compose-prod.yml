@@ -1,8 +1,8 @@
 version: '3.5'
 
 services:
-  shcedule-app:
-    container_name: shcedule-app
+  schedule-app:
+    container_name: schedule-app
     restart: always
     image: "${SCHEDULE_APP_IMAGE}"
     ports:
@@ -34,82 +34,15 @@ services:
       start_period: 30s  
 
   postgres:
-    image: postgres:15.1-alpine
-    container_name: Postgres15
-    restart: always
+    extends:
+      file: docker-compose-deps.yml
+      service: postgres
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
       - POSTGRES_ADMIN
       - POSTGRES_ADMIN_PASSWORD
       - POSTGRES_DATABASE
-    expose:
-      - 5432
     volumes:
       - postgres:/var/lib/postgresql/data
       - "${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d"
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
-      start_period: 80s  
-    
-  mongo:
-    image: mongo:jammy
-    container_name: MongoDB
-    restart: always
-    expose:
-      - 27017
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME
-      - MONGO_INITDB_ROOT_PASSWORD
-    networks:
-      - backend
-    volumes:
-      - mongo:/data/db
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mongosh",
-          "--quiet",
-          "127.0.0.1/test",
-          "--eval",
-          "'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
-
-  redis:
-    image: redis:alpine
-    container_name: Redis
-    restart: always
-    expose:
-      - 6379
-    volumes:
-      - redis:/root/redis
-    environment:
-      - REDIS_PORT
-      - REDIS_DATABASES
-    networks:
-      - backend
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
-      start_period: 80s
-
-networks:
-  backend:
-  
-volumes:
-  postgres:
-  mongo:
-  redis:
-  

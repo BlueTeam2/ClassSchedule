@@ -34,7 +34,7 @@ echo "Application is avaliable at http://$(hostname -I | cut -d' ' -f1):$SCHEDUL
 SCRIPT
 
 $docker_compose_up = <<-SCRIPT
-docker compose up -d
+docker compose -f docker-compose-deps.yml -f docker-compose.yml up -d
 SCRIPT
 
 $append_postgres_entrypoint = <<-SCRIPT
@@ -58,7 +58,9 @@ Vagrant.configure("2") do |config|
       vm_provider.memory = STAGE_RAM_MB
       vm_provider.cpus = STAGE_CPU_CNT
     end
+
     # File provision
+    stage.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file", source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
     stage.vm.provision "UL_STAGE_COMPOSE", type: "file", source: "docker-compose-stage.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
     stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
     stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
@@ -105,6 +107,7 @@ Vagrant.configure("2") do |config|
       vm_provider.cpus = PROD_CPU_CNT
     end
     # File provision
+    prod.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file", source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
     prod.vm.provision "UL_PROD_COMPOSE", type: "file", source: "docker-compose-prod.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
     prod.vm.provision "UL_PROD_ENV", type: "file", source: ".env.prod", destination: "#{DOCKER_FILES}/.env"
     prod.vm.provision "UL_PROD_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
