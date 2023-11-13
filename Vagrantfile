@@ -54,13 +54,15 @@ Vagrant.configure("2") do |config|
     stage.vm.box = "generic/ubuntu2204"
     stage.vm.box_download_options = {"ssl-revoke-best-effort" => true}
 
+    # Network configuration
+    stage.vm.network "private_network", ip: "192.168.2.48"
     stage.vm.provider VM_PROVIDER do |vm_provider|
       vm_provider.memory = STAGE_RAM_MB
       vm_provider.cpus = STAGE_CPU_CNT
     end
 
     # File provision
-    stage.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file", source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
+    stage.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file",privilaged: true, source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
     stage.vm.provision "UL_STAGE_COMPOSE", type: "file", source: "docker-compose-stage.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
     stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
     stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
@@ -81,6 +83,8 @@ Vagrant.configure("2") do |config|
     stage.vm.box = "generic/ubuntu2204"
     stage.vm.box_download_options = {"ssl-revoke-best-effort" => true}
 
+    # Network configuration
+    stage.vm.network "private_network", ip: "192.168.2.49"
     stage.vm.provider VM_PROVIDER do |vm_provider|
       vm_provider.memory = STAGE_RAM_MB
       vm_provider.cpus = STAGE_CPU_CNT
@@ -102,6 +106,8 @@ Vagrant.configure("2") do |config|
     prod.vm.box = "generic/ubuntu2204"
     prod.vm.box_download_options = {"ssl-revoke-best-effort" => true}
 
+    # Network configuration
+    prod.vm.network "private_network", ip: "192.168.2.50"
     prod.vm.provider VM_PROVIDER do |vm_provider|
       vm_provider.memory = PROD_RAM_MB
       vm_provider.cpus = PROD_CPU_CNT

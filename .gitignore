@@ -6,3 +6,4 @@
 /schedule_logs
 /.env.*
 .vagrant/
+/keys
