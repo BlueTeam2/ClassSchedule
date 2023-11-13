@@ -62,7 +62,7 @@ Vagrant.configure("2") do |config|
     end
 
     # File provision
-    stage.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file",privilaged: true, source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
+    stage.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file", source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
     stage.vm.provision "UL_STAGE_COMPOSE", type: "file", source: "docker-compose-stage.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
     stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
     stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
