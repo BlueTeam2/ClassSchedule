@@ -60,8 +60,8 @@ pipeline {
                 }
                 
                 withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
-                    sh "docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} up -d"
-                    sh "docker run --name ${targetTestName} --restart no --network backend_netwok --env-file ${ENV_FILE} ${targetTestTag}"
+                    sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} up -d'
+                    sh 'docker run --name ${targetTestName} --restart no --network backend_netwok --env-file ${ENV_FILE} ${targetTestTag}'
                 }
             }
             
@@ -113,7 +113,7 @@ pipeline {
     post {
         always {
             withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
-                sh "docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down"   
+                sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down'
             }
             sh "docker stop ${targetTestName} && docker rm ${targetTestName}"
             sh "docker volume prune -f -a"
