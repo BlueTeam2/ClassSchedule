@@ -1,1 +1,1 @@
-test v1.6
+test v1.6.0
