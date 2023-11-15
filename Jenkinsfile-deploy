@@ -29,7 +29,6 @@ pipeline {
         targetProdTag = "blueguys/schedule-app:latest"
 
         POSTGRES_ENTRYPOINT_DIR="${WORKSPACE}/postgres_entrypoint/"
-        SSH_PORT="15402" // 22
     }
     
     stages {
