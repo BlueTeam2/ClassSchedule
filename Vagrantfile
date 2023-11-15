@@ -1,13 +1,11 @@
-# VM configuration
 STAGE_RAM_MB = "2048"
 STAGE_CPU_CNT = "2"
 
 PROD_RAM_MB = "2048"
 PROD_CPU_CNT = "2"
 
-VM_PROVIDER = "vmware_desktop" # Options: "vmware_desktop", "virtualbox"
+VM_PROVIDER = "vmware_desktop" 
 
-# Project configuration
 DOCKER_FILES = "/home/vagrant"
 POSTGRES_ENTRYPOINT_DIR = "#{DOCKER_FILES}/postgres_entrypoint"
 
@@ -17,7 +15,6 @@ unless Vagrant.has_plugin?("vagrant-docker-compose")
   exit
 end
 
-### Scripts
 $app_test_results = <<-'SCRIPT'
 test_exit_code=$(docker wait schedule-app-test)
 if [ $test_exit_code -eq 0 ]; then
@@ -45,7 +42,6 @@ $apply_dos2unix = <<-'SCRIPT'
 sudo apt-get install dos2unix
 find . -type f -exec dos2unix '{}' \;
 SCRIPT
-###
 
 
 Vagrant.configure("2") do |config|
@@ -59,17 +55,14 @@ Vagrant.configure("2") do |config|
       vm_provider.cpus = STAGE_CPU_CNT
     end
 
-    # File provision
     stage.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file", source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
     stage.vm.provision "UL_STAGE_COMPOSE", type: "file", source: "docker-compose-stage.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
     stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
     stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
     stage.vm.provision "UL_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
 
-    # Docker provision
     stage.vm.provision :docker
 
-    # Shell provision
     stage.vm.provision "shell", inline: $apply_dos2unix
     stage.vm.provision "shell", inline: $append_postgres_entrypoint
     stage.vm.provision "shell", inline: $docker_compose_up, run: "always"
@@ -85,12 +78,11 @@ Vagrant.configure("2") do |config|
       vm_provider.memory = STAGE_RAM_MB
       vm_provider.cpus = STAGE_CPU_CNT
     end
-    # File provision
+
     stage.vm.provision "UL_STAGE_ENV", type: "file", source: ".env.stage", destination: "#{DOCKER_FILES}/.env"
     stage.vm.provision "UL_INIT_DUMP", type: "file", source: "./backup/initial_data.dump", destination: "#{POSTGRES_ENTRYPOINT_DIR}/initial_data.dump"
     stage.vm.provision "UL_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
 
-    # Docker provision
     stage.vm.provision "shell", inline: $apply_dos2unix
     stage.vm.provision "INSTALL_DOCKER", type: :docker
     stage.vm.provision "shell", inline: $append_postgres_entrypoint
@@ -106,15 +98,12 @@ Vagrant.configure("2") do |config|
       vm_provider.memory = PROD_RAM_MB
       vm_provider.cpus = PROD_CPU_CNT
     end
-    # File provision
     prod.vm.provision "UL_STAGE_COMPOSE_DEPS", type: "file", source: "docker-compose-deps.yml", destination: "#{DOCKER_FILES}/docker-compose-deps.yml"
     prod.vm.provision "UL_PROD_COMPOSE", type: "file", source: "docker-compose-prod.yml", destination: "#{DOCKER_FILES}/docker-compose.yml"
     prod.vm.provision "UL_PROD_ENV", type: "file", source: ".env.prod", destination: "#{DOCKER_FILES}/.env"
     prod.vm.provision "UL_PROD_INIT_SCRIPT", type: "file", source: "./scripts/init_db.sh", destination: "#{POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
 
-    # Docker provision
     prod.vm.provision :docker
-    # Shell provision
     prod.vm.provision "shell", inline: $apply_dos2unix
     prod.vm.provision "shell", inline: $append_postgres_entrypoint
     prod.vm.provision "shell", inline: $docker_compose_up, run: "always"

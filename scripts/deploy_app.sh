@@ -2,7 +2,6 @@
 
 set -ex
 
-
 if [ "$#" -eq 2 ]; then
     ENV_FILE="$1"
     OPERATION="$2"
@@ -20,8 +19,6 @@ fi
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DOCKER_CONTEXT=$(dirname "$SCRIPT_DIR")
 
-
-## Stage commands
 
 STAGE_POSTGRES_RUN_COMMAND="docker run -d
     --name postgres
@@ -70,8 +67,6 @@ STAGE_SCHEDULE_TEST_RUN_COMMAND="docker run -d
     $SCHEDULE_TEST_APP_IMAGE"
 
 
-## Dev build commands
-
 DEV_SCHEDULE_TEST_BUILD_COMMAND="docker build
     --target backend-test
     -t schedule-backend-test-dev
@@ -86,9 +81,6 @@ DEV_FRONTEND_BUILD_COMMAND="docker build
     --target frontend-dev
     -t schedule-frontend-dev
     $DOCKER_CONTEXT"
-
-
-## Dev run commands
 
 DEV_SCHEDULE_TEST_RUN_COMMAND="docker run -d
     --name schedule-backend-test-dev
