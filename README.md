@@ -88,6 +88,7 @@ JWT_TOKEN=YOUR_JWT_TOKEN
 JWT_EXPIRED=YOUR_JWT_EXPIRED
 
 ```
+
 ## Dump for DB
 
 You need initial_data.dump for DB in environments folder!!!
