@@ -32,10 +32,11 @@ pipeline {
     }
     
     stages {
-        stage('GH Poll Variables') {
+        stage('GH Variables') {
             steps {
                 sh '''
                     echo "GH merge Branch ${branch_target}"
+
                 '''
             }
         }
@@ -47,13 +48,13 @@ pipeline {
         }
         stage('Prepare postgres init script') {
             steps {
-                dir('postgres_entrypoint'){
+                dir('postgres_entrypoint') {
                     sh "cp ${WORKSPACE}/scripts/init_db.sh ${POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
                 }
             }
         }
         stage('Build and test') {
-            steps{
+            steps {
                 script {
                     docker.build("${targetTestTag}","--target ${targetTestStage} .")
                 }
@@ -61,6 +62,15 @@ pipeline {
                 withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
                     sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} up -d'
                     sh 'docker run --name ${targetTestName} --restart no --network backend_netwok --env-file ${ENV_FILE} ${targetTestTag}'
+                }
+            }
+            post {
+                always {
+                    withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
+                        sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down'
+                    }
+                    sh "docker stop ${targetTestName} && docker rm ${targetTestName}"
+                    sh "docker volume prune -f -a"
                 }
             }
             
@@ -76,7 +86,7 @@ pipeline {
                 
             }
         }
-        stage('Deploy stage'){
+        stage('Deploy stage') {
             when {
                     environment name: 'branch_target', value: 'stage' 
             }
@@ -92,7 +102,7 @@ pipeline {
                 }
             }
         }
-        stage('Deploy production'){
+        stage('Deploy production') {
             when {
                 environment name: 'branch_target', value: 'main' 
             }
@@ -110,13 +120,7 @@ pipeline {
         }
     }
     post {
-        always {
-            withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
-                sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down'
-            }
-            sh "docker stop ${targetTestName} && docker rm ${targetTestName}"
-            sh "docker volume prune -f -a"
-            
+        always {            
             echo 'Slack Notifications.'
             slackSend channel: '#jenkinscicd',
                 color: COLOR_MAP[currentBuild.currentResult],
