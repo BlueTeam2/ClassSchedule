@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Bash script is working"
+
 if [ -n "$POSTGRES_TEST_DATABASE" ]; then
 
 psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" << EOSQL
