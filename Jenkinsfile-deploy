@@ -1,0 +1,129 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good', 
+    'FAILURE': 'danger',
+]
+
+pipeline {
+    agent any
+    
+    triggers {
+        GenericTrigger (
+            genericHeaderVariables: [
+                [ key: 'X-GitHub-Event' ]
+            ],
+            genericVariables: [
+                [ key: 'branch_target', value: '$.ref', regexpFilter: 'refs/heads/' ],
+            ],
+            token: 'merge',
+            regexpFilterText: '$branch_target',
+            regexpFilterExpression: '^(main|stage)$',
+        )
+    }
+    
+    environment{
+        targetTestStage = "backend-test"
+        targetProdStage = "backend-tomcat-prod"
+        
+        targetTestTag = "schedule-test:${BUILD_NUMBER}"
+        targetTestName= "schedule-app-test-${BUILD_NUMBER}"
+        targetProdTag = "blueguys/schedule-app:latest"
+
+        POSTGRES_ENTRYPOINT_DIR="${WORKSPACE}/postgres_entrypoint/"
+    }
+    
+    stages {
+        stage('GH Variables') {
+            steps {
+                sh '''
+                    echo "GH merge Branch ${branch_target}"
+
+                '''
+            }
+        }
+        
+        stage('Checkout') {
+            steps {
+                git branch: "${branch_target}", credentialsId: 'git-class-schedule-jenkins', url: 'git@github.com:BlueTeam2/ClassScheduleJenkins.git'
+            }
+        }
+        stage('Prepare postgres init script') {
+            steps {
+                dir('postgres_entrypoint') {
+                    sh "cp ${WORKSPACE}/scripts/init_db.sh ${POSTGRES_ENTRYPOINT_DIR}/init_db.sh"
+                }
+            }
+        }
+        stage('Build and test') {
+            steps {
+                script {
+                    docker.build("${targetTestTag}","--target ${targetTestStage} .")
+                }
+                
+                withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
+                    sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} up -d'
+                    sh 'docker run --name ${targetTestName} --restart no --network backend_netwok --env-file ${ENV_FILE} ${targetTestTag}'
+                }
+            }
+            post {
+                always {
+                    withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
+                        sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down -v'
+                    }
+                    sh "docker stop ${targetTestName} && docker rm ${targetTestName} && docker rmi ${targetTestName}"
+                }
+            }
+            
+        }
+        stage('Build production image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'blue-team-docker-hub') {
+                        def customImage = docker.build("${targetProdTag}", "--target ${targetProdStage} .")
+                        customImage.push()
+                    }
+                }
+                
+            }
+        }
+        stage('Deploy stage') {
+            when {
+                    environment name: 'branch_target', value: 'stage' 
+            }
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: 'stage-vm-ssh',usernameVariable: 'USERNAME', keyFileVariable: 'SSH_KEY'),
+                                 string(credentialsId: 'stage-vm-address', variable: 'STAGE_VM_ADDRESS')]) {
+                        
+                    sh '''
+                    ssh -i ${SSH_KEY} ${USERNAME}@${STAGE_VM_ADDRESS} -p ${SSH_PORT} \
+                        "docker pull ${targetProdTag} && \
+                         docker compose -f docker-compose-deps.yml -f docker-compose.yml up -d"
+                    '''
+                }
+            }
+        }
+        stage('Deploy production') {
+            when {
+                environment name: 'branch_target', value: 'main' 
+            }
+            steps {
+                withCredentials([sshUserPrivateKey(credentialsId: 'prod-vm-ssh',usernameVariable: 'USERNAME', keyFileVariable: 'SSH_KEY'),
+                                 string(credentialsId: 'prod-vm-address', variable: 'PROD_VM_ADDRESS')]) {
+                        
+                    sh '''
+                    ssh -i ${SSH_KEY} ${USERNAME}@${PROD_VM_ADDRESS} -p ${SSH_PORT} \
+                        "docker pull ${targetProdTag} && \
+                         docker compose -f docker-compose-deps.yml -f docker-compose.yml up -d"
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        always {            
+            echo 'Slack Notifications.'
+            slackSend channel: '#jenkinscicd',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
+        }
+    }
+}
