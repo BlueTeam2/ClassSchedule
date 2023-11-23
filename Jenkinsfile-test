@@ -84,6 +84,8 @@ pipeline {
                     *To*: ${branch_target}\n\n
                     More info at: ${env.BUILD_URL}
                 """.stripIndent()
+            
+            cleanWs()
         }
     }
 }
