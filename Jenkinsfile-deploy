@@ -112,7 +112,7 @@ pipeline {
     }
     post {
         always {
-            sh "docker rmi ${targetTestName}"
+            // sh "docker rmi ${targetTestName}"
             echo 'Slack Notifications.'
             slackSend channel: '#jenkinscicd',
                 color: COLOR_MAP[currentBuild.currentResult],
