@@ -1,4 +1,4 @@
-# Class chedule
+  # Class chedule
 ## General info
 This repository contains the Class Schedule Project made by Blue Team.
 
