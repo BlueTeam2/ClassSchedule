@@ -70,10 +70,9 @@ pipeline {
     post {
         always {
             withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]) {
-                sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down'
+                sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down -v'
             }
-            sh "docker volume prune -f -a"
-            sh "docker stop ${targetTestName} && docker rm ${targetTestName}"
+            sh "docker stop ${targetTestName} && docker rm ${targetTestName} && docker rmi ${targetTestName}"
             
             echo 'Slack Notifications.'
             slackSend channel: '#jenkinscicd',
