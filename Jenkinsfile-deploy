@@ -90,7 +90,15 @@ pipeline {
                     environment name: 'branch_target', value: 'stage' 
             }
             steps {
-                echo "Deploy production version. Ooops. Not yet."
+                ansibleTower(
+                    jobTemplate: '18',
+                    jobType: 'run',
+                    throwExceptionWhenFail: false,
+                    towerCredentialsId: 'awx-admin-token',
+                    towerLogLevel: 'false',
+                    towerServer: 'AnsibleTower(AWX)',
+                    verbose: true
+                )
             }
         }
         stage('Deploy production') {
@@ -112,7 +120,7 @@ pipeline {
     }
     post {
         always {
-            // sh "docker rmi ${targetTestName}"
+            sh "docker rmi ${targetTestTag}"
             echo 'Slack Notifications.'
             slackSend channel: '#jenkinscicd',
                 color: COLOR_MAP[currentBuild.currentResult],

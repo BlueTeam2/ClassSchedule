@@ -72,7 +72,7 @@ pipeline {
             withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]) {
                 sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down -v'
             }
-            sh "docker stop ${targetTestName} && docker rm ${targetTestName} && docker rmi ${targetTestName}"
+            sh "docker stop ${targetTestName} && docker rm ${targetTestName} && docker rmi ${targetTestTag}"
             
             echo 'Slack Notifications.'
             slackSend channel: '#jenkinscicd',
