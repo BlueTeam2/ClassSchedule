@@ -25,10 +25,14 @@ pipeline {
         targetProdStage = "backend-tomcat-prod"
         
         targetTestTag = "schedule-test:${BUILD_NUMBER}"
-        targetTestName= "schedule-app-test-${BUILD_NUMBER}"
+        targetTestName = "schedule-app-test-${BUILD_NUMBER}"
         targetProdTag = "blueguys/schedule-app:latest"
 
-        POSTGRES_ENTRYPOINT_DIR="${WORKSPACE}/postgres_entrypoint/"
+        AWX_DEPLOY_STAGE_TEMPLATE_ID = '16'
+        AWX_DEPLOY_PROD_TEMPLATE_ID = '18'
+
+        POSTGRES_ENTRYPOINT_DIR = "${WORKSPACE}/postgres_entrypoint/"
+        DOCKER_NETWORK_NAME = 'backend_netwok'
     }
     
     stages {
@@ -61,7 +65,7 @@ pipeline {
                 
                 withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
                     sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} up -d'
-                    sh 'docker run --name ${targetTestName} --restart no --network backend_netwok --env-file ${ENV_FILE} ${targetTestTag}'
+                    sh 'docker run --name ${targetTestName} --restart no --network ${DOCKER_NETWORK_NAME} --env-file ${ENV_FILE} ${targetTestTag}'
                 }
             }
             post {
@@ -69,7 +73,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
                         sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down -v'
                     }
-                    sh "docker stop ${targetTestName} && docker rm ${targetTestName} && docker rmi ${targetTestName}"
+                    sh "docker stop ${targetTestName} && docker rm ${targetTestName}"
                 }
             }
             
@@ -90,15 +94,15 @@ pipeline {
                     environment name: 'branch_target', value: 'stage' 
             }
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'stage-vm-ssh',usernameVariable: 'USERNAME', keyFileVariable: 'SSH_KEY'),
-                                 string(credentialsId: 'stage-vm-address', variable: 'STAGE_VM_ADDRESS')]) {
-                        
-                    sh '''
-                    ssh -i ${SSH_KEY} ${USERNAME}@${STAGE_VM_ADDRESS} -p ${SSH_PORT} \
-                        "docker pull ${targetProdTag} && \
-                         docker compose -f docker-compose-deps.yml -f docker-compose.yml up -d"
-                    '''
-                }
+                ansibleTower(
+                    jobTemplate: "${AWX_DEPLOY_STAGE_TEMPLATE_ID}",
+                    jobType: 'run',
+                    throwExceptionWhenFail: false,
+                    towerCredentialsId: 'awx-admin-token',
+                    towerLogLevel: 'false',
+                    towerServer: 'AnsibleTower(AWX)',
+                    verbose: true
+                )
             }
         }
         stage('Deploy production') {
@@ -106,24 +110,27 @@ pipeline {
                 environment name: 'branch_target', value: 'main' 
             }
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'prod-vm-ssh',usernameVariable: 'USERNAME', keyFileVariable: 'SSH_KEY'),
-                                 string(credentialsId: 'prod-vm-address', variable: 'PROD_VM_ADDRESS')]) {
-                        
-                    sh '''
-                    ssh -i ${SSH_KEY} ${USERNAME}@${PROD_VM_ADDRESS} -p ${SSH_PORT} \
-                        "docker pull ${targetProdTag} && \
-                         docker compose -f docker-compose-deps.yml -f docker-compose.yml up -d"
-                    '''
-                }
+                ansibleTower(
+                    jobTemplate: "${AWX_DEPLOY_PROD_TEMPLATE_ID}",
+                    jobType: 'run',
+                    throwExceptionWhenFail: false,
+                    towerCredentialsId: 'awx-admin-token',
+                    towerLogLevel: 'false',
+                    towerServer: 'AnsibleTower(AWX)',
+                    verbose: true
+                )
             }
         }
     }
     post {
-        always {            
+        always {
+            sh "docker rmi ${targetTestTag}"
             echo 'Slack Notifications.'
             slackSend channel: '#jenkinscicd',
                 color: COLOR_MAP[currentBuild.currentResult],
                 message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
+            
+            cleanWs()
         }
     }
 }

@@ -34,6 +34,7 @@ pipeline {
         targetProdTag = "blueguys/schedule-app:latest"
 
         POSTGRES_ENTRYPOINT_DIR="${JENKINS_HOME}/userContent/postgres_entrypoint/"
+        DOCKER_NETWORK_NAME = 'backend_netwok'
     }
     
     stages {
@@ -61,7 +62,7 @@ pipeline {
                 
                 withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]){
                     sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} up -d'
-                    sh 'docker run --name ${targetTestName} --restart no --network backend_netwok --env-file ${ENV_FILE} ${targetTestTag}'
+                    sh 'docker run --name ${targetTestName} --restart no --network ${DOCKER_NETWORK_NAME} --env-file ${ENV_FILE} ${targetTestTag}'
                 }
             }
             
@@ -72,7 +73,7 @@ pipeline {
             withCredentials([file(credentialsId: 'test-dot-env-file', variable: 'ENV_FILE')]) {
                 sh 'docker compose -f docker-compose-deps.yml --env-file ${ENV_FILE} down -v'
             }
-            sh "docker stop ${targetTestName} && docker rm ${targetTestName} && docker rmi ${targetTestName}"
+            sh "docker stop ${targetTestName} && docker rm ${targetTestName} && docker rmi ${targetTestTag}"
             
             echo 'Slack Notifications.'
             slackSend channel: '#jenkinscicd',
@@ -84,6 +85,8 @@ pipeline {
                     *To*: ${branch_target}\n\n
                     More info at: ${env.BUILD_URL}
                 """.stripIndent()
+            
+            cleanWs()
         }
     }
 }
