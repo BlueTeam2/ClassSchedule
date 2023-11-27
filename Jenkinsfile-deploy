@@ -47,7 +47,7 @@ pipeline {
         
         stage('Checkout') {
             steps {
-                git branch: "${branch_target}", credentialsId: 'git-class-schedule', url: 'git@github.com:BlueTeam2/ClassSchedule.git'
+                git branch: "${branch_target}", credentialsId: 'jenkins-git-class-schedule', url: 'git@github.com:BlueTeam2/ClassSchedule.git'
             }
         }
         stage('Prepare postgres init script') {
