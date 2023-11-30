@@ -24,25 +24,12 @@ services:
       - mongo
       - redis
 
-  schedule-web:
-    container_name: schedule-web
-    restart: always
-    build: 
-      context: .
-      target: frontend-dev
-    ports:
-      - "${SCHEDULE_WEP_PORT}:3000"
-    environment:
-      - "REACT_APP_API_BASE_URL=http://localhost:${SCHEDULE_APP_PORT}/"
-    depends_on:
-      - schedule-backend
-
   schedule-backend:
     container_name: schedule-backend
     restart: always
     build: 
       context: .
-      target: backend-tomcat-dev
+      target: backend-tomcat
     ports:
       - "${SCHEDULE_APP_PORT}:8080"
     environment:
