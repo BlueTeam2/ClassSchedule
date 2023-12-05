@@ -16,7 +16,7 @@ services:
       - 5432
     volumes:
       - postgres:/var/lib/postgresql/data
-      # - "${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d"
+      - "${POSTGRES_ENTRYPOINT_DIR}:/docker-entrypoint-initdb.d"
     networks:
       - backend
     healthcheck:
