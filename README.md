@@ -1,22 +1,14 @@
-# Class chedule
+# **Schedule Application**
 ## General info
-This repository contains the Class Schedule Project made by Blue Team.
+This repository contains the Class Schedule Project made by **Blue Team**.
 
 ## Diagram 
 
-<img src="./java_web_app.png" alt= “” width="476px" height="574px">
-
-# First, download and install Vagrant on your system:
-
-```wget https://releases.hashicorp.com/vagrant/2.2.19/vagrant_2.2.19_x86_64.deb```
-
-```sudo apt install ./vagrant_2.2.19_x86_64.deb```
-
-Verify Vagrant Installation and Install Vagrant Plugin
+<img src="./app_diagram_with_backgroud.png" alt= “” width="" height="">
 
 ## Application Stack
 
-- ReactJS
+- React
 - Java (11)
 - Gradle (7)
 - Tomcat (9)
@@ -25,83 +17,98 @@ Verify Vagrant Installation and Install Vagrant Plugin
 - Redis:latest
 - Docker:latest
 
-## After installation, verify that Vagrant is correctly installed with:
+# **Development environment**
+## Start application
 
-`vagrant --version`
+    docker compose -f docker-compose-deps.yml -docker-compose-dev.yml --env-file .env.dev up
 
-Additionally, install the vagrant-docker-compose plugin:
+## Environment variables
+You should provide file **`.env.dev`** inside project
+```bash
+## Postgres configuration
 
-`vagrant plugin install vagrant-docker-compose`
+# Application connection strings
+POSTGRES_DATABASE=schedule
+POSTGRES_TEST_DATABASE=schedule_test
+POSTGRES_URL=jdbc:postgresql://postgres:5432/$POSTGRES_DATABASE
+POSTGRES_TEST_URL=jdbc:postgresql://postgres:5432/$POSTGRES_TEST_DATABASE
 
-# Create .env.stage and .env.prod
-## .env.stage
-```
-#Postgres configuration
-POSTGRES_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_DATABASE
-POSTGRES_DATABASE=YOUR_POSTGRES_DATABASE
+# Application user
+POSTGRES_ADMIN=schedule
+POSTGRES_ADMIN_PASSWORD=9h4m03JQURp7
 
-POSTGRES_TEST_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_TEST_DATABASE
-POSTGRES_TEST_DATABASE=YOUR_POSTGRES_TEST_DATABASE
+# Postgres container user
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=9h4m03JQURp7
 
-POSTGRES_ADMIN_USERNAME=YOUR_POSTGRES_ADMIN_USERNAME
-POSTGRES_ADMIN_PASSWORD=YOUR_POSTGRES_ADMIN_PASSWORD
+# Containers ports
+SCHEDULE_APP_PORT=8888
+SCHEDULE_WEP_PORT=3000
 
-POSTGRES_USER=YOUR_USER
-POSTGRES_PASSWORD=YOUR_POSTGRES_PASSWORD
-
-# Redis configuration
+## Redis configuration
 REDIS_URL=redis://redis:6379
 REDIS_PORT=6379
 REDIS_DATABASES=16
 
-# Mongo configuration
-MONGO_DATABASE=YOUR_MONGO_DATABASE
+## Mongo configuration
+MONGO_DATABASE=schedules
 MONGO_URL=mongo
-MONGO_INITDB_ROOT_USERNAME=YOUR_MONGO_INITDB_ROOT_USERNAME
-MONGO_INITDB_ROOT_PASSWORD=YOUR_MONGO_INITDB_ROOT_PASSWORD
+MONGO_INITDB_ROOT_USERNAME=root
+MONGO_INITDB_ROOT_PASSWORD=4MMq0fDOf8sY
 
-# JWT configuration
-JWT_TOKEN=YOUR_JWT_TOKEN
-JWT_EXPIRED=YOUR_JWT_EXPIRED
+## JWT configuration
+JWT_TOKEN=jwttoken
+JWT_EXPIRED=86400000
 ```
-## .env.prod
-```
-# Postgres configuration
-POSTGRES_URL=jdbc:postgresql://postgres:5432/YOUR_POSTGRES_DB
-POSTGRES_USER=YOUR_POSTGRES_USER
-POSTGRES_PASSWORD=YOUR_POSTGRES_PASSWORD
-POSTGRES_DB=YOUR_POSTGRES_DB
 
-# Redis configuration
-REDIS_URL=redis://redis:6379
-REDIS_PORT=6379
-REDIS_DATABASES=16
+## Restore the database data using dump file
+To restore database data, create a file named **initial_data.dump** inside the **/ClassSchedule/backup** folder.
 
-# Mongo configuration
-MONGO_DATABASE=YOUR_MONGO_DATABASE
-MONGO_URL=mongo
-MONGO_INITDB_ROOT_USERNAME=YOUR_MONGO_INITDB_ROOT_USERNAME
-MONGO_INITDB_ROOT_PASSWORD=YOUR_MONGO_INITDB_ROOT_PASSWORD
 
-# JWT configuration
-JWT_TOKEN=YOUR_JWT_TOKEN
-JWT_EXPIRED=YOUR_JWT_EXPIRED
+# **Stage and production environment**
+## Installing Vagrant
+To install **Vagrant**, visit [Vagrant Installation](https://developer.hashicorp.com/vagrant/install).
 
-```
-## Dump for DB
+## Verify Vagrant Version
+Ensure that Vagrant is correctly installed by running the following command:
 
-You need initial_data.dump for DB in environments folder!!!
+    vagrant --version
 
-# Starting the App
-To start the application in either a staging (stage) or production (prod) environment, follow these steps:
 
-Launch the application using Vagrant:
+## VM Provider
+You need to download a VM Provider of your choice from the options below:
 
-## For the staging environment:
+- [VirtualBox](https://www.virtualbox.org)
+- [VMware Workstation Player](https://www.vmware.com/products/workstation-player/workstation-player-evaluation.html)
 
-`vagrant up stage`
-## For the production environment:
 
-`vagrant up prod`
+## Changing VM Provider inside Vagrantfile
+In **Vagrantfile**, replace the default **VM Provider** with one you have chosen:
 
-Please note that you may need to configure your Vagrantfile and Docker Compose settings to match your project requirements and dependencies. Make sure to check the project's documentation for any additional setup or configuration steps.
+    VM_PROVIDER = <your-vm-provider>
+
+## Start the Environment:
+### For Stage Environment:
+
+    vagrant up stage
+### For Production Environment:
+
+    vagrant up prod
+
+# **Ansible** 
+## Explore Our Ansible Automation Repository
+
+Leverage Ansible for streamlined **configuration management** and **automation** tasks in our project. Simplify infrastructure deployment and management through code.
+
+You can explore and contribute to our Ansible automation scripts by visiting our **GitHub Repository**:
+
+### *[Ansible Repository](https://github.com/BlueTeam2/awx-ansible)*
+
+# **Terraform**
+## Explore Our Terraform Infrastructure as Code (IaC) Repository
+
+For managing infrastructure, we utilize Terraform in our project. 
+
+You can explore and contribute to our Terraform codebase by visiting our **GitHub Repository**:
+
+### *[Terraform Repository](https://github.com/BlueTeam2/terraform-live.git)*
