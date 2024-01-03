@@ -96,7 +96,7 @@ In **Vagrantfile**, replace the default **VM Provider** with one you have chosen
     vagrant up prod
 
 # **Ansible** 
-## Explore Our Ansible Automation Repository
+### Explore Our Ansible Automation repository
 
 Leverage Ansible for streamlined **configuration management** and **automation** tasks in our project. Simplify infrastructure deployment and management through code.
 
@@ -105,10 +105,30 @@ You can explore and contribute to our Ansible automation scripts by visiting our
 ### *[Ansible Repository](https://github.com/BlueTeam2/awx-ansible)*
 
 # **Terraform**
-## Explore Our Terraform Infrastructure as Code (IaC) Repository
+### Explore Our Terraform Infrastructure as Code (IaC) repository
 
-For managing infrastructure, we utilize Terraform in our project. 
-
+We're **migrated** on **Terragrunt** now, Terraform was for **Demo 2**. 
 You can explore and contribute to our Terraform codebase by visiting our **GitHub Repository**:
 
 ### *[Terraform Repository](https://github.com/BlueTeam2/terraform-live.git)*
+
+# **Terragrunt**
+### Explore Our Terragrunt Infrastructure as Code (IaC) repository
+
+For managing infrastructure in our project, we now employ Terragrunt. You can explore and contribute to our Terragrunt codebase by visiting our **GitHub Repository**:
+
+### *[Terragrunt Repository](https://github.com/BlueTeam2/terragrunt-live.git)*
+
+# **Frontend**
+### Explore Our Frontend repository
+
+We've split our application into **Frontend** and **Backend** parts. The Frontend part has been moved to a new repository named ***class-schedule-frontend***, while Backend part remains in the **ClassSchedule** repository.
+
+### *[Frontend Repository](https://github.com/BlueTeam2/class-schedule-frontend)*
+
+# **Class-schedule-k8s**
+
+### Explore class-schedule-k8s repository
+This repository is specified for managing a **Kubernetes cluster**. It includes Helm charts and Consul for peering our clusters across diferrent clouds. Visit our **GitHub Repository**:
+
+### *[Class-schedule-k8s Repository](https://github.com/BlueTeam2/class-schedule-k8s.git)*
