@@ -1,0 +1,127 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger',
+]
+
+properties([
+  parameters([
+    [
+      $class: 'ChoiceParameter',
+      choiceType: 'PT_SINGLE_SELECT',
+      name: 'BACKEND_IMAGE_TAG',
+      script: [
+        $class: 'ScriptlerScript',
+        scriptlerScriptId:'nexus-class-schedule-backend.groovy'
+      ]
+    ],
+    [
+      $class: 'ChoiceParameter',
+      choiceType: 'PT_SINGLE_SELECT',
+      name: 'FRONTEND_IMAGE_TAG',
+      script: [
+        $class: 'ScriptlerScript',
+        scriptlerScriptId:'nexus-class-schedule-frontend.groovy'
+      ]
+    ],
+    [
+      $class: 'ChoiceParameter',
+      choiceType: 'PT_SINGLE_SELECT',
+      name: 'DEPLOY_ENVIRONMENT',
+      script: [
+        $class: 'ScriptlerScript',
+        scriptlerScriptId:'environment-type.groovy'
+      ]
+   ]
+ ])
+])
+
+pipeline {
+    agent any
+
+    environment {
+        AWX_DEPLOY_DEV_TEMPLATE_ID = '32'
+        AWX_DEPLOY_STAGE_TEMPLATE_ID = '31'
+
+        BACKEND_IMAGE_NAME="class-schedule-backend"
+        FRONTEND_IMAGE_NAME="class-schedule-frontend"
+    }
+
+    stages {
+        stage('Print envirnoment variables') {
+            steps {
+                sh '''
+                    echo "DEPLOY_ENVIRONMENT: ${DEPLOY_ENVIRONMENT}"
+                    echo "AWX_DEPLOY_DEV_TEMPLATE_ID: ${AWX_DEPLOY_DEV_TEMPLATE_ID}"
+                    echo "AWX_DEPLOY_STAGE_TEMPLATE_ID: ${AWX_DEPLOY_STAGE_TEMPLATE_ID}"
+                    echo "BACKEND_IMAGE_NAME: ${BACKEND_IMAGE_NAME}"
+                    echo "BACKEND_IMAGE_TAG: ${BACKEND_IMAGE_TAG}"
+                    echo "FRONTEND_IMAGE_NAME: ${FRONTEND_IMAGE_NAME}"
+                    echo "FRONTEND_IMAGE_TAG: ${FRONTEND_IMAGE_TAG}"
+                '''
+            }
+        }
+
+        stage('Deploy dev') {
+            when {
+                environment name: 'DEPLOY_ENVIRONMENT', value: 'dev'
+            }
+            steps {
+                ansibleTower(
+                    jobTemplate: "${AWX_DEPLOY_DEV_TEMPLATE_ID}",
+                    jobType: 'run',
+                    throwExceptionWhenFail: false,
+                    towerCredentialsId: 'awx-admin-token',
+                    towerLogLevel: 'full',
+                    towerServer: 'AnsibleTower(AWX)',
+                    verbose: true,
+                    extraVars: """
+                        schedule_app_backend_image_name: ${BACKEND_IMAGE_NAME}
+                        schedule_app_backend_image_tag: ${BACKEND_IMAGE_TAG}
+                        schedule_app_frontend_image_name: ${FRONTEND_IMAGE_NAME}
+                        schedule_app_frontend_image_tag: ${FRONTEND_IMAGE_TAG}
+                    """,
+                )
+            }
+        }
+
+        stage('Deploy stage') {
+            when {
+                    environment name: 'DEPLOY_ENVIRONMENT', value: 'stage'
+            }
+            steps {
+                ansibleTower(
+                    jobTemplate: "${AWX_DEPLOY_STAGE_TEMPLATE_ID}",
+                    jobType: 'run',
+                    throwExceptionWhenFail: false,
+                    towerCredentialsId: 'awx-admin-token',
+                    towerLogLevel: 'full',
+                    towerServer: 'AnsibleTower(AWX)',
+                    verbose: true,
+                    extraVars: """
+                        schedule_app_backend_image_name: ${BACKEND_IMAGE_NAME}
+                        schedule_app_backend_image_tag: ${BACKEND_IMAGE_TAG}
+                        schedule_app_frontend_image_name: ${FRONTEND_IMAGE_NAME}
+                        schedule_app_frontend_image_tag: ${FRONTEND_IMAGE_TAG}
+                    """,
+                )
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Slack Notifications.'
+            slackSend channel: '#jenkinscicd',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: """
+                    *Deploy Status ${currentBuild.currentResult}*\n\n
+                    *Environment*: ${env.DEPLOY_ENVIRONMENT}
+                    *Backend image tag*: ${BACKEND_IMAGE_TAG}
+                    *Frontend image tag*: ${FRONTEND_IMAGE_TAG}
+                    More info at: ${env.BUILD_URL}
+                """.stripIndent()
+
+            cleanWs()
+        }
+    }
+}
