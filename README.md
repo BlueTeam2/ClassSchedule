@@ -4,8 +4,8 @@ This repository contains the Class Schedule Project made by **Blue Team**.
 
 ## Diagram 
 
-<img src="./app_diagram_400dpi.png" alt= “” width="" height="">
-<!-- ![app diagram](https://github.com/BlueTeam2/ClassSchedule/blob/main/app_diagram_with_backgroud.png) -->
+<!-- <img src="./app_diagram_400dpi.png" alt= “” width="" height=""> -->
+![plot](./app_diagram_400dpi.png)
 
 ## Application Stack
 
