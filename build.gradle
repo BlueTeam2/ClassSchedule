@@ -91,10 +91,6 @@ ext {
     SWAGGER_VERSION = '2.9.2'
 }
 
-//
-//    compileOnly "org.projectlombok:lombok:$LOMBOK_VERSION"
-//    implementation "org.springframework.boot:spring-boot-star
-
 dependencies {
     testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.6.1'
     testImplementation('pl.pragmatists:JUnitParams:1.0.5')
