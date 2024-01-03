@@ -1,0 +1,95 @@
+def COLOR_MAP = [
+    'SUCCESS': 'good',
+    'FAILURE': 'danger',
+]
+
+pipeline {
+    agent any
+
+    triggers {
+        GenericTrigger (
+            genericHeaderVariables: [
+                [ key: 'X-GitHub-Event' ]
+            ],
+            genericVariables: [
+                [ key: 'BRANCH_TARGET', value: '$.ref', regexpFilter: 'refs/heads/' ],
+            ],
+            token: 'merge_backend',
+            regexpFilterText: '$BRANCH_TARGET',
+            regexpFilterExpression: '^main$',
+        )
+    }
+
+    environment {
+        BACKEND_IMAGE_NAME="class-schedule-backend"
+        BACKEND_IMAGE_TAG="1.0.${BUILD_NUMBER}"
+        BACKEND_TEST_IMAGE_TAG="test-1.0.${BUILD_NUMBER}"
+        BACKEND_TARGET="backend-tomcat"
+        BACKEND_TEST_TARGET="backend-test"
+        REPOSITORY_ADDRESS="https://nexus.smaha.top/"
+    }
+
+    stages {
+        stage('GH Variables') {
+            steps {
+                sh '''
+                    echo "GH merge Branch ${BRANCH_TARGET}"
+                '''
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                git branch: "${BRANCH_TARGET}", credentialsId: 'jenkins-git-class-schedule', url: 'git@github.com:BlueTeam2/ClassSchedule.git'
+            }
+        }
+
+        stage('Build and test') {
+            steps {
+                withCredentials([file(credentialsId: 'docker-compose-dot-env-test', variable: 'ENV_FILE_PATH')]) {
+                    sh 'docker compose -f docker-compose-test.yml --env-file="$ENV_FILE_PATH" up -d'
+                    sh 'docker wait schedule-app-test'
+                }
+            }
+            post {
+                always {
+                    withCredentials([file(credentialsId: 'docker-compose-dot-env-test', variable: 'ENV_FILE_PATH')]) {
+                        sh 'docker compose -f docker-compose-test.yml --env-file="$ENV_FILE_PATH" down'
+                    }
+                }
+            }
+        }
+
+        stage('Build production image') {
+            steps {
+                script {
+                    docker.withRegistry("${REPOSITORY_ADDRESS}", 'nexus-admin') {
+                        def backendImage = docker.build("${BACKEND_IMAGE_NAME}:${BACKEND_IMAGE_TAG}", "--target ${BACKEND_TARGET} .")
+                        backendImage.push()
+                    }
+                }
+            }
+            post {
+                always {
+                    sh "docker rmi -f ${BACKEND_IMAGE_NAME}:${BACKEND_IMAGE_TAG}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Slack Notifications.'
+            slackSend channel: '#jenkinscicd',
+                color: COLOR_MAP[currentBuild.currentResult],
+                message: """
+                    *Build ${currentBuild.currentResult} [Backend]*\n\n
+                    *Job*: ${env.JOB_NAME}\n
+                    *Build number*: ${env.BUILD_NUMBER}\n
+                    More info at: ${env.BUILD_URL}
+                """.stripIndent()
+
+            cleanWs()
+        }
+    }
+}
